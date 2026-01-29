@@ -192,33 +192,51 @@
             font-weight: 700;
             white-space: nowrap;
         }
-        .resource-row {
-            display: flex;
+        .segment-toggle {
+            display: inline-flex;
             align-items: center;
+            gap: 0.5rem;
+            min-height: 44px;
+            padding: 0.4rem 0.6rem;
+            border-radius: 0.75rem;
+            background: #f9fafb;
+        }
+        .segment-delete-btn {
+            padding: 0.5rem 0.75rem;
+            min-width: 44px;
+            min-height: 44px;
+        }
+        .resource-card__header {
+            display: flex;
+            align-items: flex-start;
             gap: 0.75rem;
         }
-        .resource-row__header {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            flex: 1;
-        }
-        .resource-row__metrics {
-            display: flex;
-            align-items: center;
+        .resource-metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 0.75rem;
         }
         .resource-field {
             display: flex;
-            align-items: center;
+            flex-direction: column;
             gap: 0.4rem;
         }
         .resource-delete {
-            width: 2rem;
-            height: 2rem;
+            width: 2.5rem;
+            height: 2.5rem;
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            min-width: 44px;
+            min-height: 44px;
+        }
+        .scenario-delete {
+            min-width: 44px;
+            min-height: 44px;
+        }
+        .results-chips .metric-badge {
+            font-size: 0.75rem;
+            padding: 0.3rem 0.55rem;
         }
         .metric-badge--success {
             background: #dcfce7;
@@ -357,6 +375,9 @@
             body {
                 overflow-x: hidden;
             }
+            .mobile-scroll-hint {
+                display: none;
+            }
             .scenario-card {
                 padding: 1rem;
                 gap: 1rem;
@@ -364,34 +385,22 @@
             .scenario-section {
                 padding: 0.75rem;
             }
-            .resource-row {
-                display: flex;
-                flex-direction: column;
+            .resource-card {
                 gap: 0.5rem;
-                max-width: 100%;
             }
-            .resource-row__header {
-                position: relative;
+            .resource-card__header {
+                align-items: flex-start;
             }
             .resource-name {
                 width: 100% !important;
                 box-sizing: border-box;
-                padding-right: 2.75rem;
             }
-            .resource-row__metrics {
-                display: grid;
+            .resource-metrics-grid {
                 grid-template-columns: 1fr 1fr;
                 gap: 0.5rem;
                 width: 100%;
             }
-            .resource-row__metrics input {
-                width: 100% !important;
-                box-sizing: border-box;
-            }
             .resource-delete {
-                position: absolute;
-                top: 0.25rem;
-                right: 0.25rem;
                 width: 2.5rem;
                 height: 2.5rem;
                 display: inline-flex;
@@ -399,8 +408,8 @@
                 justify-content: center;
                 padding: 0;
             }
-            .resource-row input,
-            .resource-row label {
+            .resource-card input,
+            .resource-card label {
                 max-width: 100%;
             }
             .scenario-card input,

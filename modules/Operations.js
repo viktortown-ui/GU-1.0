@@ -58,60 +58,58 @@ class Operations {
 
         return `
             <div class="bg-white border border-gray-200 rounded-lg p-6 space-y-6 scenario-card" data-scenario-id="${scenario.id}">
-                <div class="flex items-start justify-between gap-4">
+                <div class="scenario-card__header flex items-start justify-between gap-4">
                     <input
                         type="text"
-                        class="scenario-name text-lg font-semibold text-gray-900 bg-transparent border-b-2 border-transparent hover:border-gray-300 focus:border-blue-500 focus:outline-none"
+                        class="scenario-name scenario-title flex-1 text-lg font-semibold text-gray-900 bg-transparent border-b-2 border-transparent hover:border-gray-300 focus:border-blue-500 focus:outline-none"
                         value="${scenario.name || 'Новый сценарий'}"
                         onchange="app.modules.operations.updateScenario(${scenario.id}, 'name', this.value)"
                     />
                     <button
                         onclick="app.modules.operations.deleteScenario(${scenario.id})"
-                        class="px-3 py-2 rounded-lg border border-red-200 text-red-500 hover:text-red-700 hover:border-red-300 transition-colors"
+                        class="scenario-delete px-3 py-2 rounded-lg border border-red-200 text-red-500 hover:text-red-700 hover:border-red-300 transition-colors"
                         title="Удалить сценарий"
                     >
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
 
-                <div class="space-y-4">
-                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 scenario-section">
-                        <div class="flex items-center justify-between mb-3">
-                            <h4 class="font-medium text-gray-900 flex items-center gap-2">Вводы ${this.renderHint('Сколько заявок приходит в час. Можно грубо.')}</h4>
-                        </div>
-                        <div class="flex flex-col md:flex-row md:items-center md:space-x-4 gap-3">
-                            <label class="text-sm text-gray-600 w-full md:w-32">Заявки/час:</label>
-                            <input
-                                type="number"
-                                class="scenario-demand w-full md:flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                value="${NumberUtils.safeNumber(scenario.demand, 0)}"
-                                min="0"
-                                step="0.1"
-                                onchange="app.modules.operations.updateScenario(${scenario.id}, 'demand', NumberUtils.toFloatOrNull(this.value))"
-                            />
-                        </div>
+                <div class="scenario-section bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="font-medium text-gray-900 flex items-center gap-2">Вводы ${this.renderHint('Сколько заявок приходит в час. Можно грубо.')}</h4>
                     </div>
-
-                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 scenario-section">
-                        <div class="flex items-center justify-between mb-3">
-                            <h4 class="font-medium text-gray-900">Ресурсы</h4>
-                            <button
-                                onclick="app.modules.operations.addResource(${scenario.id})"
-                                class="px-3 py-1 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
-                            >
-                                <i class="fas fa-plus mr-1"></i>Добавить
-                            </button>
-                        </div>
-
-                        <div class="space-y-3">
-                            ${scenario.resources.map((resource, index) => this.renderResourceRow(scenario.id, resource, index)).join('')}
-                        </div>
+                    <div class="flex flex-col md:flex-row md:items-center md:space-x-4 gap-3">
+                        <label class="text-sm text-gray-600 w-full md:w-32">Заявки/час:</label>
+                        <input
+                            type="number"
+                            class="scenario-demand w-full md:flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            value="${NumberUtils.safeNumber(scenario.demand, 0)}"
+                            min="0"
+                            step="0.1"
+                            onchange="app.modules.operations.updateScenario(${scenario.id}, 'demand', NumberUtils.toFloatOrNull(this.value))"
+                        />
                     </div>
                 </div>
 
-                <div class="bg-white border border-gray-200 rounded-lg p-4">
+                <div class="scenario-section bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="font-medium text-gray-900">Ресурсы</h4>
+                        <button
+                            onclick="app.modules.operations.addResource(${scenario.id})"
+                            class="px-3 py-1 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                            <i class="fas fa-plus mr-1"></i>Добавить
+                        </button>
+                    </div>
+
+                    <div class="space-y-3">
+                        ${scenario.resources.map((resource, index) => this.renderResourceRow(scenario.id, resource, index)).join('')}
+                    </div>
+                </div>
+
+                <div class="scenario-results bg-white border border-gray-200 rounded-lg p-4">
                     <h4 class="font-medium text-gray-900 mb-3">Результаты</h4>
-                    <div class="flex flex-wrap gap-2">
+                    <div class="results-chips flex flex-wrap gap-2">
                         <span class="metric-badge metric-rho ${rhoClass}">ρ: ${rhoValue}</span>
                         <span class="metric-badge metric-wq">Wq: ${wqValue}</span>
                         <span class="metric-badge metric-index">Индекс: ${index}</span>
@@ -123,11 +121,11 @@ class Operations {
 
     renderResourceRow(scenarioId, resource, index) {
         return `
-            <div class="resource-row p-3 bg-gray-50 rounded-lg">
-                <div class="resource-row__header">
+            <div class="resource-card p-3 bg-white border border-gray-200 rounded-lg">
+                <div class="resource-card__header flex items-start gap-2">
                     <input
                         type="text"
-                        class="resource-name flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        class="resource-name w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="Название ресурса"
                         value="${resource.name || ''}"
                         onchange="app.modules.operations.updateResource(${scenarioId}, ${index}, 'name', this.value)"
@@ -140,12 +138,12 @@ class Operations {
                         <i class="fas fa-trash text-sm"></i>
                     </button>
                 </div>
-                <div class="resource-row__metrics">
+                <div class="resource-card__metrics resource-metrics-grid mt-3">
                     <label class="resource-field text-xs text-gray-600">
                         Мощность
                         <input
                             type="number"
-                            class="resource-capacity w-20 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            class="resource-capacity w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                             value="${NumberUtils.safeNumber(resource.capacity, 0)}"
                             min="0"
                             step="0.1"
@@ -156,7 +154,7 @@ class Operations {
                         Надежность
                         <input
                             type="number"
-                            class="resource-reliability w-20 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            class="resource-reliability w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                             value="${NumberUtils.clamp(resource.reliability, 0, 1, 0.95)}"
                             min="0"
                             max="1"
