@@ -265,6 +265,11 @@
             .segments-cards {
                 display: block;
             }
+        }
+        @media (max-width: 420px) {
+            .module-nav {
+                display: none;
+            }
             .bottom-nav {
                 display: flex;
             }
@@ -329,7 +334,7 @@
     </header>
 
     <!-- Навигация по модулям -->
-    <nav class="bg-white border-b sticky top-0 z-40">
+    <nav class="module-nav bg-white border-b sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex space-x-4 module-tabs">
                 <button data-module="premortem" class="module-tab py-4 px-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors">
@@ -648,22 +653,22 @@
     </main>
 
     <!-- Нижняя навигация (mobile) -->
-    <nav class="bottom-nav md:hidden" aria-label="Нижняя навигация">
+    <nav class="bottom-nav" aria-label="Нижняя навигация">
         <button class="bottom-nav__item" data-module="premortem" type="button">
             <i class="fas fa-brain text-base"></i>
             <span>Premortem</span>
         </button>
+        <button class="bottom-nav__item" data-module="segments" type="button">
+            <i class="fas fa-chart-pie text-base"></i>
+            <span>Segments</span>
+        </button>
+        <button class="bottom-nav__item" data-module="operations" type="button">
+            <i class="fas fa-cogs text-base"></i>
+            <span>Operations</span>
+        </button>
         <button class="bottom-nav__item" data-module="report" type="button">
             <i class="fas fa-file-lines text-base"></i>
             <span>Report</span>
-        </button>
-        <button class="bottom-nav__item" data-module="analysis" type="button">
-            <i class="fas fa-chart-line text-base"></i>
-            <span>Analysis</span>
-        </button>
-        <button class="bottom-nav__item" data-module="portfolio" type="button">
-            <i class="fas fa-sliders text-base"></i>
-            <span>Project</span>
         </button>
     </nav>
 

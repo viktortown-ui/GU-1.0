@@ -214,11 +214,6 @@ class PremortemHub {
         document.querySelectorAll('.bottom-nav__item').forEach(item => {
             item.addEventListener('click', () => {
                 const target = item.dataset.module;
-                if (target === 'analysis') {
-                    const next = this.currentModule === 'segments' ? 'operations' : 'segments';
-                    this.switchModule(next);
-                    return;
-                }
                 this.switchModule(target);
             });
         });
@@ -449,9 +444,6 @@ class PremortemHub {
         document.querySelectorAll('.bottom-nav__item').forEach(item => {
             item.classList.remove('active');
             if (item.dataset.module === moduleName) {
-                item.classList.add('active');
-            }
-            if (item.dataset.module === 'analysis' && (moduleName === 'segments' || moduleName === 'operations')) {
                 item.classList.add('active');
             }
         });
