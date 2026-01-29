@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PREMORTEM HUB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Шапка -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-brain text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">PREMORTEM HUB</h1>
+                        <p class="text-sm text-gray-500">Система предпроектной аналитики</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button id="helpBtn" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors" title="Инструкция">
+                        <i class="fas fa-circle-question mr-2"></i>Инструкция
+                    </button>
+                    <button id="importBtn" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                        <i class="fas fa-upload mr-2"></i>Импорт
+                    </button>
+                    <button id="exportAllBtn" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                        <i class="fas fa-download mr-2"></i>Экспорт всех
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Основной контент -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Приветственный блок -->
+        <div id="welcomeBlock" class="text-center py-12">
+            <div class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-lightbulb text-blue-600 text-4xl"></i>
+            </div>
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Добро пожаловать в PREMORTEM HUB</h2>
+            <p class="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+                Начните с создания нового проекта. Используйте системный подход к анализу идей, 
+                сегментации рынка и оценке операционной устойчивости.
+            </p>
+            <button id="createFirstBtn" class="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-lg font-medium">
+                <i class="fas fa-plus mr-2"></i>Создать первый проект
+            </button>
+        </div>
+
+        <!-- Список проектов -->
+        <div id="projectsSection" class="hidden">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-900">Мои проекты</h2>
+                <button id="createProjectBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-plus mr-2"></i>Новый проект
+                </button>
+            </div>
+            
+            <div id="projectsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Проекты будут добавляться динамически -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Модальное окно создания проекта -->
+    <div id="createModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-lg max-w-md w-full p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-gray-900">Новый проект</h3>
+                <button id="closeModal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="createForm">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Название проекта</label>
+                    <input 
+                        type="text" 
+                        id="projectName" 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Введите название проекта"
+                        required
+                    >
+                </div>
+                
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Описание (опционально)</label>
+                    <textarea 
+                        id="projectDescription" 
+                        rows="3"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Краткое описание проекта"
+                    ></textarea>
+                </div>
+                
+                <div class="flex space-x-3">
+                    <button type="button" id="cancelBtn" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                        Отмена
+                    </button>
+                    <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        Создать
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальное окно инструкции -->
+    <div id="helpModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-xl max-w-5xl w-full shadow-xl border overflow-hidden">
+            <div class="px-5 py-4 border-b flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-circle-question text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900">Инструкция PREMORTEM HUB</h3>
+                        <p class="text-xs text-gray-500">Подробный учебный режим: что вводить, зачем и как читать вывод</p>
+                    </div>
+                </div>
+                <button id="helpCloseBtn" class="text-gray-400 hover:text-gray-600" title="Закрыть">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4">
+                <!-- Содержание -->
+                <aside class="md:col-span-1 border-r bg-gray-50 p-4">
+                    <div class="text-xs font-semibold text-gray-500 mb-2">Содержание</div>
+                    <div class="space-y-1 text-sm">
+                        <button class="help-nav w-full text-left px-3 py-2 rounded-lg hover:bg-white" data-target="help-start">
+                            1) Быстрый старт
+                        </button>
+                        <button class="help-nav w-full text-left px-3 py-2 rounded-lg hover:bg-white" data-target="help-projects">
+                            2) Проекты, экспорт, импорт
+                        </button>
+                        <button class="help-nav w-full text-left px-3 py-2 rounded-lg hover:bg-white" data-target="help-premortem">
+                            3) Premortem Lite (7 шагов)
+                        </button>
+                        <button class="help-nav w-full text-left px-3 py-2 rounded-lg hover:bg-white" data-target="help-segments">
+                            4) Сегменты рынка
+                        </button>
+                        <button class="help-nav w-full text-left px-3 py-2 rounded-lg hover:bg-white" data-target="help-operations">
+                            5) Операционная устойчивость
+                        </button>
+                        <button class="help-nav w-full text-left px-3 py-2 rounded-lg hover:bg-white" data-target="help-portfolio">
+                            6) Портфель идей
+                        </button>
+                        <button class="help-nav w-full text-left px-3 py-2 rounded-lg hover:bg-white" data-target="help-report">
+                            7) Отчёт (1 страница)
+                        </button>
+                        <button class="help-nav w-full text-left px-3 py-2 rounded-lg hover:bg-white" data-target="help-troubles">
+                            8) Если что-то сломалось
+                        </button>
+                        <button class="help-nav w-full text-left px-3 py-2 rounded-lg hover:bg-white" data-target="help-author">
+                            9) Подсказки для автора
+                        </button>
+                    </div>
+
+                    <div class="mt-4 p-3 bg-white rounded-lg border text-xs text-gray-600">
+                        <div class="font-semibold text-gray-700 mb-1">Горячие клавиши</div>
+                        <div>• <span class="font-mono">Esc</span> — закрыть</div>
+                        <div>• <span class="font-mono">?</span> — открыть/закрыть</div>
+                    </div>
+                </aside>
+
+                <!-- Тело инструкции -->
+                <section id="helpBody" class="md:col-span-3 p-5 max-h-[75vh] overflow-auto scroll-smooth">
+                    <div id="help-start" class="mb-10">
+                        <h4 class="text-xl font-bold text-gray-900 mb-2">1) Быстрый старт за 3 минуты</h4>
+                        <p class="text-gray-700">Задача HUB — не "угадать будущее", а <b>помочь принять решение</b>: что проверять, где туман, где иллюзии, и какие 5–7 шагов реально сделать.</p>
+                        <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div class="p-4 border rounded-lg bg-white">
+                                <div class="text-sm font-semibold text-gray-900 mb-1">Шаг A</div>
+                                <div class="text-sm text-gray-600">Создай проект (название + 1 строка описания).</div>
+                            </div>
+                            <div class="p-4 border rounded-lg bg-white">
+                                <div class="text-sm font-semibold text-gray-900 mb-1">Шаг B</div>
+                                <div class="text-sm text-gray-600">Пройди <b>Premortem Lite</b> до конца (7 шагов).</div>
+                            </div>
+                            <div class="p-4 border rounded-lg bg-white">
+                                <div class="text-sm font-semibold text-gray-900 mb-1">Шаг C</div>
+                                <div class="text-sm text-gray-600">Открой <b>Отчёт</b> и скопируй краткую выжимку.</div>
+                            </div>
+                        </div>
+                        <div class="mt-4 p-4 rounded-lg bg-blue-50 border border-blue-100 text-sm text-blue-900">
+                            <b>Золотое правило:</b> если ты не уверен в цифрах — это нормально. Вводи <b>диапазоны</b> (минимум/база/максимум). Смысл не в точности, а в том, чтобы увидеть: <b>от чего результат зависит сильнее всего</b>.
+                        </div>
+                    </div>
+
+                    <div id="help-projects" class="mb-10">
+                        <h4 class="text-xl font-bold text-gray-900 mb-2">2) Проекты, сохранение, экспорт и импорт</h4>
+                        <p class="text-gray-700">Проект — это одна идея/бизнес/план. Внутри проекта живут данные всех модулей.</p>
+                        <div class="mt-3 space-y-3 text-sm text-gray-700">
+                            <div class="p-4 border rounded-lg bg-white">
+                                <div class="font-semibold mb-1">Где всё хранится?</div>
+                                <div>В браузере, в <b>localStorage</b>. Это быстро и приватно, но если очистить данные браузера — можно потерять проекты.</div>
+                            </div>
+                            <div class="p-4 border rounded-lg bg-white">
+                                <div class="font-semibold mb-1">Экспорт — твоя страховка</div>
+                                <div>Экспорт делает файл <b>.json</b> со всеми данными. Делай экспорт после важных правок (как «сохранить копию тетради»).</div>
+                            </div>
+                            <div class="p-4 border rounded-lg bg-white">
+                                <div class="font-semibold mb-1">Импорт</div>
+                                <div>Импорт возвращает проект(ы) из .json обратно в HUB. Удобно переносить на другой комп/телефон.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="help-premortem" class="mb-10">
+                        <h4 class="text-xl font-bold text-gray-900 mb-2">3) Premortem Lite — главный вход (7 шагов)</h4>
+                        <p class="text-gray-700">Это основной модуль. Он делает из хаоса идеи — <b>структуру</b>, <b>грубую экономику</b>, два индекса (FogI/IllI) и <b>план проверок</b>.</p>
+
+                        <div class="mt-4 space-y-4">
+                            <div class="p-4 rounded-lg border bg-white">
+                                <div class="font-semibold text-gray-900 mb-1">Шаг 1 — Вброс идеи</div>
+                                <div class="text-sm text-gray-700">Пиши как другу: <b>что делаем</b>, <b>для кого</b>, <b>почему нужно</b>, <b>как зарабатываем</b>.</div>
+                                <div class="mt-2 text-xs text-gray-600 bg-gray-50 border rounded-lg p-3">
+                                    Пример: «Сервис, где жители города находят мастеров по ремонту. Клиент оставляет заявку, мастера откликаются. Доход — комиссия с заказа или подписка мастера». 
+                                </div>
+                            </div>
+
+                            <div class="p-4 rounded-lg border bg-white">
+                                <div class="font-semibold text-gray-900 mb-1">Шаг 2 — Разбор на части</div>
+                                <div class="text-sm text-gray-700">Система раскладывает текст на: <b>клиент</b> → <b>проблема</b> → <b>решение</b> → <b>формат</b>. Твоя задача — поправить, если криво.</div>
+                                <div class="mt-2 text-xs text-gray-600">Если шаг 2 «не попал» — почти всегда виноват шаг 1 (слишком туманно). Перепиши проще.</div>
+                            </div>
+
+                            <div class="p-4 rounded-lg border bg-white">
+                                <div class="font-semibold text-gray-900 mb-1">Шаг 3 — Одно предложение</div>
+                                <div class="text-sm text-gray-700">Выбираешь лучший вариант. Критерий простой: <b>понятно кто</b>, <b>что получает</b>, <b>почему важно</b>.</div>
+                            </div>
+
+                            <div class="p-4 rounded-lg border bg-white">
+                                <div class="font-semibold text-gray-900 mb-1">Шаг 4 — Экономика для ленивых (3 сценария)</div>
+                                <div class="text-sm text-gray-700">Заполняешь диапазоны: <b>цена</b>, <b>спрос</b>, <b>расходы</b>. Система считает прибыль в плохом/базовом/хорошем сценарии.</div>
+                                <ul class="mt-2 text-sm text-gray-700 list-disc pl-5">
+                                    <li><b>Минимум</b> — если всё идёт хуже ожиданий.</li>
+                                    <li><b>База</b> — как ты реалистично думаешь.</li>
+                                    <li><b>Максимум</b> — если пошло лучше.</li>
+                                </ul>
+                                <div class="mt-2 text-xs text-gray-600">Смысл: увидеть, что будет, если спрос упадёт в 2 раза или расходы вырастут на 30%.</div>
+                            </div>
+
+                            <div class="p-4 rounded-lg border bg-white">
+                                <div class="font-semibold text-gray-900 mb-1">Шаг 5 — Конкуренты/рынок</div>
+                                <div class="text-sm text-gray-700">Если модуль просит — впиши аналоги и уровень конкуренции честно. Конкуренты — не зло. Зло — отсутствие отличия и слабая экономика.</div>
+                            </div>
+
+                            <div class="p-4 rounded-lg border bg-white">
+                                <div class="font-semibold text-gray-900 mb-1">Шаг 6 — FogI (туман)</div>
+                                <div class="text-sm text-gray-700">FogI растёт, когда ты ставишь «не знаю» на критические пункты. Высокий FogI = сначала собрать факты, потом спорить с миром.</div>
+                                <div class="mt-2 text-xs text-gray-600">Подход: выбери 2–3 пункта «не знаю» и преврати их в задачи на неделю.</div>
+                            </div>
+
+                            <div class="p-4 rounded-lg border bg-white">
+                                <div class="font-semibold text-gray-900 mb-1">Шаг 7 — IllI (иллюзии)</div>
+                                <div class="text-sm text-gray-700">IllI показывает зоны, где ты можешь себя обманывать ("конкурентов нет", "расходов почти нет", "все купят"). Чем выше IllI — тем важнее тестировать реальность маленькими шагами.</div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 p-4 rounded-lg bg-green-50 border border-green-100 text-sm text-green-900">
+                            <b>Как правильно пользоваться вердиктом:</b> это не приговор. Это подсказка «куда копать». Даже статус «плохо» полезен, если он честно показывает, что чинить.
+                        </div>
+                    </div>
+
+                    <div id="help-segments" class="mb-10">
+                        <h4 class="text-xl font-bold text-gray-900 mb-2">4) Сегменты рынка — кому продаём</h4>
+                        <p class="text-gray-700">Сегмент — это не "все люди". Сегмент — это <b>тип клиентов</b> с похожей причиной покупки.</p>
+                        <div class="mt-3 text-sm text-gray-700 space-y-3">
+                            <div class="p-4 border rounded-lg bg-white">
+                                <div class="font-semibold mb-1">Что вводить</div>
+                                <div>Название сегмента, объём (сколько их), частота (как часто покупают), и оценки: доступность/готовность/боль/охват.</div>
+                            </div>
+                            <div class="p-4 border rounded-lg bg-white">
+                                <div class="font-semibold mb-1">Как читать индекс сегмента</div>
+                                <div>Индекс — это не истина. Это приоритизация. Выбирай 1–3 сегмента с лучшим индексом, чтобы делать первые тесты продаж.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="help-operations" class="mb-10">
+                        <h4 class="text-xl font-bold text-gray-900 mb-2">5) Операционная устойчивость — выдержишь ли поток</h4>
+                        <p class="text-gray-700">Этот модуль спасает от типичной смерти: «продал → утонул в заявках».</p>
+                        <div class="mt-3 text-sm text-gray-700 space-y-3">
+                            <div class="p-4 border rounded-lg bg-white">
+                                <div class="font-semibold mb-1">Как вводить</div>
+                                <div>Для каждого сценария задаёшь: поток заявок (сколько приходит) и мощность (сколько можешь обработать). Система считает перегруз и очередь.</div>
+                            </div>
+                            <div class="p-4 border rounded-lg bg-white">
+                                <div class="font-semibold mb-1">Как читать</div>
+                                <div>Если перегруз &gt; 0.9 — очередь начинает расти как снежный ком. Решение: увеличивать мощность, упрощать процесс, поднимать цену или ограничивать спрос.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="help-portfolio" class="mb-10">
+                        <h4 class="text-xl font-bold text-gray-900 mb-2">6) Портфель идей — когда идей много</h4>
+                        <p class="text-gray-700">Портфель нужен, чтобы не поставить всё на одну карту и не сгореть.</p>
+                        <div class="mt-3 text-sm text-gray-700 space-y-3">
+                            <div class="p-4 border rounded-lg bg-white">
+                                <div class="font-semibold mb-1">Что вводить</div>
+                                <div>Для каждой идеи: доход/расход (или прибыль), риск/разброс, ресурсы. Затем доли или выбор идей в портфель.</div>
+                            </div>
+                            <div class="p-4 border rounded-lg bg-white">
+                                <div class="font-semibold mb-1">Что важно смотреть</div>
+                                <div>Не только среднюю прибыль, но и худшие хвосты (условный VaR/CVaR). Портфель должен быть <b>живучим</b>, а не красивым.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="help-report" class="mb-10">
+                        <h4 class="text-xl font-bold text-gray-900 mb-2">7) Отчёт — итоговая 1 страница</h4>
+                        <p class="text-gray-700">Отчёт собирает всё важное в одну картинку: вердикт, экономику, FogI/IllI, сводки модулей и план действий.</p>
+                        <div class="mt-3 text-sm text-gray-700 space-y-3">
+                            <div class="p-4 border rounded-lg bg-white">
+                                <div class="font-semibold mb-1">Кнопка «Копировать кратко»</div>
+                                <div>Это готовая выжимка для заметок/телеграма: статус + цифры + 3 ключевых действия.</div>
+                            </div>
+                            <div class="p-4 border rounded-lg bg-white">
+                                <div class="font-semibold mb-1">Печать / PDF</div>
+                                <div>Печатает только отчёт (остальные блоки скрываются), удобно сохранять как PDF.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="help-troubles" class="mb-10">
+                        <h4 class="text-xl font-bold text-gray-900 mb-2">8) Если что-то сломалось</h4>
+                        <div class="mt-3 text-sm text-gray-700 space-y-3">
+                            <div class="p-4 border rounded-lg bg-white">
+                                <div class="font-semibold mb-1">Данные не сохраняются</div>
+                                <div>Не используй инкогнито. Не очищай данные браузера. Делай экспорт после важных правок.</div>
+                            </div>
+                            <div class="p-4 border rounded-lg bg-white">
+                                <div class="font-semibold mb-1">Нули/NaN/Infinity</div>
+                                <div>Где-то введён ноль в месте, где нельзя (например мощность = 0). Поставь адекватное число и обнови экран.</div>
+                            </div>
+                            <div class="p-4 border rounded-lg bg-white">
+                                <div class="font-semibold mb-1">Стили/иконки не грузятся</div>
+                                <div>Проект подтягивает Tailwind/FontAwesome из интернета. Для полной оффлайн-версии нужно скачать их локально или сделать сервис-воркер кеширование.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="help-author" class="mb-2">
+                        <h4 class="text-xl font-bold text-gray-900 mb-2">9) Подсказки для автора (чтобы продукт был не «тест»)</h4>
+                        <div class="mt-3 text-sm text-gray-700 space-y-3">
+                            <div class="p-4 border rounded-lg bg-white">
+                                <div class="font-semibold mb-1">Одна дверь входа</div>
+                                <div>Веди пользователя так: <b>Premortem → Отчёт</b>. Остальные модули — как «углубиться», а не как обязательные вкладки.</div>
+                            </div>
+                            <div class="p-4 border rounded-lg bg-white">
+                                <div class="font-semibold mb-1">Сделай «первый тест»</div>
+                                <div>В отчёте всегда показывай 1–3 конкретных действия на неделю. Люди платят за ясность следующего шага.</div>
+                            </div>
+                            <div class="p-4 border rounded-lg bg-white">
+                                <div class="font-semibold mb-1">Не показывай сложные слова</div>
+                                <div>«VaR/CVaR/AHP» внутри — ок. На экране пользователю: «худший сценарий», «важность», «вес».</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- Подвал -->
+    <footer class="bg-white border-t mt-16">
+        <div class="max-w-7xl mx-auto px-4 py-6">
+            <div class="text-center text-gray-500 text-sm">
+                <p>PREMORTEM HUB © 2025 — Инструмент системной оценки проектов</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Скрипты -->
+    <script src="utils/Storage.js"></script>
+    <script src="utils/ExportImport.js"></script>
+    <script src="utils/Calculators.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
