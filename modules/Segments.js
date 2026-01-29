@@ -26,6 +26,7 @@ class Segments {
 
     render() {
         this.renderSegmentsTable();
+        this.renderSegmentsCards();
         this.updateStats();
     }
 
@@ -49,6 +50,25 @@ class Segments {
 
         tbody.innerHTML = segments.map(segment => this.renderSegmentRow(segment)).join('');
         this.bindSegmentEvents();
+    }
+
+    renderSegmentsCards() {
+        const container = document.getElementById('segmentsCards');
+        const segments = this.project.segments?.segments || [];
+
+        if (!container) return;
+
+        if (segments.length === 0) {
+            container.innerHTML = `
+                <div class="border border-dashed rounded-lg p-6 text-center text-gray-500">
+                    <i class="fas fa-chart-pie text-3xl mb-3"></i>
+                    <p>Нет сегментов. Добавьте первый сегмент для анализа.</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = segments.map(segment => this.renderSegmentCard(segment)).join('');
     }
 
     renderSegmentRow(segment) {
@@ -136,13 +156,123 @@ class Segments {
                 <td class="py-3">
                     <button
                         onclick="app.modules.segments.deleteSegment(${segment.id})"
-                        class="text-red-500 hover:text-red-700 transition-colors"
+                        class="px-2 py-1 rounded-lg border border-red-200 text-red-500 hover:text-red-700 hover:border-red-300 transition-colors"
                         title="Удалить"
                     >
                         <i class="fas fa-trash"></i>
                     </button>
                 </td>
             </tr>
+        `;
+    }
+
+    renderSegmentCard(segment) {
+        return `
+            <div class="bg-white border border-gray-200 rounded-lg p-4 space-y-4" data-segment-id="${segment.id}">
+                <div class="flex items-center justify-between gap-3">
+                    <input
+                        type="text"
+                        class="segment-name flex-1 text-base font-semibold text-gray-900 bg-transparent border-b border-transparent focus:border-blue-500 focus:outline-none"
+                        value="${segment.name || ''}"
+                        placeholder="Название сегмента"
+                        onchange="app.modules.segments.updateSegment(${segment.id}, 'name', this.value)"
+                    />
+                    <button
+                        onclick="app.modules.segments.deleteSegment(${segment.id})"
+                        class="px-2 py-1 rounded-lg border border-red-200 text-red-500 hover:text-red-700 hover:border-red-300 transition-colors"
+                        title="Удалить сегмент"
+                    >
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+
+                <div class="flex items-center justify-between text-sm text-gray-600">
+                    <label class="flex items-center gap-2">
+                        <input
+                            type="checkbox"
+                            class="segment-check"
+                            ${segment.checked ? 'checked' : ''}
+                            onchange="app.modules.segments.toggleSegment(${segment.id})"
+                        />
+                        Активен
+                    </label>
+                    <span class="metric-badge">Индекс: ${segment.index || 0}</span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="text-xs text-gray-600">
+                        Объём
+                        <input
+                            type="number"
+                            class="segment-volume mt-1 w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                            value="${NumberUtils.safeNumber(segment.volume, 0)}"
+                            min="0"
+                            onchange="app.modules.segments.updateSegment(${segment.id}, 'volume', NumberUtils.toFloatOrNull(this.value))"
+                        />
+                    </label>
+                    <label class="text-xs text-gray-600">
+                        Частота
+                        <input
+                            type="number"
+                            class="segment-frequency mt-1 w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                            value="${NumberUtils.safeNumber(segment.frequency, 1)}"
+                            min="1"
+                            max="365"
+                            onchange="app.modules.segments.updateSegment(${segment.id}, 'frequency', NumberUtils.toFloatOrNull(this.value))"
+                        />
+                    </label>
+                </div>
+
+                <details class="bg-gray-50 rounded-lg p-3">
+                    <summary class="text-xs font-semibold text-gray-700">Оценки сегмента</summary>
+                    <div class="grid grid-cols-2 gap-3 mt-3">
+                        <label class="text-xs text-gray-600">
+                            Доступность
+                            <input
+                                type="number"
+                                class="segment-accessibility mt-1 w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                value="${NumberUtils.clamp(segment.metrics?.accessibility, 1, 5, 3)}"
+                                min="1"
+                                max="5"
+                                onchange="app.modules.segments.updateMetric(${segment.id}, 'accessibility', NumberUtils.toFloatOrNull(this.value))"
+                            />
+                        </label>
+                        <label class="text-xs text-gray-600">
+                            Готовность
+                            <input
+                                type="number"
+                                class="segment-willingness mt-1 w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                value="${NumberUtils.clamp(segment.metrics?.willingness, 1, 5, 3)}"
+                                min="1"
+                                max="5"
+                                onchange="app.modules.segments.updateMetric(${segment.id}, 'willingness', NumberUtils.toFloatOrNull(this.value))"
+                            />
+                        </label>
+                        <label class="text-xs text-gray-600">
+                            Боль
+                            <input
+                                type="number"
+                                class="segment-pain mt-1 w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                value="${NumberUtils.clamp(segment.metrics?.pain, 1, 5, 3)}"
+                                min="1"
+                                max="5"
+                                onchange="app.modules.segments.updateMetric(${segment.id}, 'pain', NumberUtils.toFloatOrNull(this.value))"
+                            />
+                        </label>
+                        <label class="text-xs text-gray-600">
+                            Охват
+                            <input
+                                type="number"
+                                class="segment-reach mt-1 w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                value="${NumberUtils.clamp(segment.metrics?.reach, 1, 5, 3)}"
+                                min="1"
+                                max="5"
+                                onchange="app.modules.segments.updateMetric(${segment.id}, 'reach', NumberUtils.toFloatOrNull(this.value))"
+                            />
+                        </label>
+                    </div>
+                </details>
+            </div>
         `;
     }
 
@@ -183,7 +313,9 @@ class Segments {
     }
 
     deleteSegment(id) {
-        if (!confirm('Удалить сегмент?')) return;
+        const segment = this.findSegment(id);
+        const name = segment?.name ? ` «${segment.name}»` : '';
+        if (!confirm(`Удалить сегмент${name}?`)) return;
 
         const segments = this.project.segments?.segments || [];
         this.project.segments.segments = segments.filter(s => s.id !== id);
@@ -216,6 +348,7 @@ class Segments {
             const idxEl = row ? row.querySelector('.segment-index') : null;
             if (idxEl) idxEl.textContent = segment.index;
 
+            this.renderSegmentsCards();
             this.updateStats();
             if (window.app) window.app.persistProject(true);
         }
@@ -227,6 +360,7 @@ class Segments {
             segment.metrics[metric] = NumberUtils.clamp(value, 1, 5, 3);
             this.updateSegmentIndex(segment);
             this.renderSegmentsTable();
+            this.renderSegmentsCards();
             this.updateStats();
             if (window.app) window.app.persistProject(true);
         }

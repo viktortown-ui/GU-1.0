@@ -77,9 +77,11 @@ class PremortemLite {
         document.querySelectorAll('.step-btn').forEach((btn, index) => {
             const stepNum = index + 1;
             btn.classList.remove('bg-blue-600', 'text-white', 'bg-gray-200', 'text-gray-600');
+            btn.classList.remove('step-active');
 
             if (stepNum === this.currentStep) {
                 btn.classList.add('bg-blue-600', 'text-white');
+                btn.classList.add('step-active');
             } else {
                 btn.classList.add('bg-gray-200', 'text-gray-600');
             }

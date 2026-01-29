@@ -4,17 +4,21 @@ class PremortemHub {
         this.currentProject = null;
         this.currentModule = 'premortem';
         this.modules = {};
+        this.themeStorageKey = 'premortem-theme';
+        this.currentTheme = 'light';
 
         this.init();
     }
 
     init() {
         this.determinePage();
+        this.initTheme();
         this.bindEvents();
 
         if (this.isAppPage()) {
             this.loadProject();
             this.initModules();
+            this.collapseInfoCardsOnMobile();
         } else {
             this.loadProjectsList();
         }
@@ -38,6 +42,53 @@ class PremortemHub {
 
         // Инструкция (help modal) доступна на обеих страницах
         this.bindHelpEvents();
+    }
+
+    initTheme() {
+        const saved = localStorage.getItem(this.themeStorageKey);
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+        const theme = saved || (prefersDark.matches ? 'dark' : 'light');
+
+        this.applyTheme(theme, !!saved);
+
+        prefersDark.addEventListener('change', (event) => {
+            if (localStorage.getItem(this.themeStorageKey)) return;
+            this.applyTheme(event.matches ? 'dark' : 'light', false);
+        });
+
+        const toggleBtn = document.getElementById('themeToggle');
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => this.toggleTheme());
+        }
+    }
+
+    applyTheme(theme, persist = true) {
+        this.currentTheme = theme === 'dark' ? 'dark' : 'light';
+        document.documentElement.dataset.theme = this.currentTheme;
+        if (persist) {
+            localStorage.setItem(this.themeStorageKey, this.currentTheme);
+        }
+        this.updateThemeToggle();
+    }
+
+    toggleTheme() {
+        const nextTheme = this.currentTheme === 'dark' ? 'light' : 'dark';
+        this.applyTheme(nextTheme, true);
+    }
+
+    updateThemeToggle() {
+        const toggleBtn = document.getElementById('themeToggle');
+        if (!toggleBtn) return;
+
+        const label = toggleBtn.querySelector('.theme-toggle-label');
+        const icon = toggleBtn.querySelector('i');
+        if (label) {
+            label.textContent = this.currentTheme === 'dark' ? 'Светлая' : 'Тёмная';
+        }
+        if (icon) {
+            icon.classList.remove('fa-sun', 'fa-moon');
+            icon.classList.add(this.currentTheme === 'dark' ? 'fa-sun' : 'fa-moon');
+        }
     }
 
     bindHelpEvents() {
@@ -160,6 +211,18 @@ class PremortemHub {
             });
         });
 
+        document.querySelectorAll('.bottom-nav__item').forEach(item => {
+            item.addEventListener('click', () => {
+                const target = item.dataset.module;
+                if (target === 'analysis') {
+                    const next = this.currentModule === 'segments' ? 'operations' : 'segments';
+                    this.switchModule(next);
+                    return;
+                }
+                this.switchModule(target);
+            });
+        });
+
         // Сохранение и экспорт
         const saveBtn = document.getElementById('saveProjectBtn');
         const exportBtn = document.getElementById('exportProjectBtn');
@@ -168,6 +231,14 @@ class PremortemHub {
         if (exportBtn) exportBtn.addEventListener('click', () => ExportImport.exportProject(this.currentProject));
 
         window.addEventListener('beforeunload', () => this.persistProject(true));
+    }
+
+    collapseInfoCardsOnMobile() {
+        const isMobile = window.matchMedia('(max-width: 768px)').matches;
+        if (!isMobile) return;
+        document.querySelectorAll('.info-card').forEach(card => {
+            card.removeAttribute('open');
+        });
     }
 
     showCreateModal() {
@@ -374,6 +445,16 @@ class PremortemHub {
         }
 
         this.currentModule = moduleName;
+
+        document.querySelectorAll('.bottom-nav__item').forEach(item => {
+            item.classList.remove('active');
+            if (item.dataset.module === moduleName) {
+                item.classList.add('active');
+            }
+            if (item.dataset.module === 'analysis' && (moduleName === 'segments' || moduleName === 'operations')) {
+                item.classList.add('active');
+            }
+        });
 
         // Refresh module data
         if (this.modules[moduleName]) {
