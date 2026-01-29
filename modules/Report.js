@@ -89,14 +89,14 @@ class Report {
         // Portfolio
         const ideas = (this.project?.portfolio?.ideas || []);
         const portfolioIndex = ideas.length ? Calculators.calculatePortfolioIndex(this.project.portfolio) : null;
-        const avgRisk = ideas.length ? (ideas.reduce((s, i) => s + (Number.isFinite(i?.risk) ? i.risk : 0), 0) / ideas.length) : null;
-        const avgLoad = ideas.length ? (ideas.reduce((s, i) => s + (Number.isFinite(i?.load) ? i.load : 0), 0) / ideas.length) : null;
-        const avgTime = ideas.length ? (ideas.reduce((s, i) => s + (Number.isFinite(i?.time) ? i.time : 0), 0) / ideas.length) : null;
+        const avgRisk = ideas.length ? (ideas.reduce((s, i) => s + NumberUtils.safeNumber(i?.risk, 0), 0) / ideas.length) : null;
+        const avgLoad = ideas.length ? (ideas.reduce((s, i) => s + NumberUtils.safeNumber(i?.load, 0), 0) / ideas.length) : null;
+        const avgTime = ideas.length ? (ideas.reduce((s, i) => s + NumberUtils.safeNumber(i?.time, 0), 0) / ideas.length) : null;
         const simulation = ideas.length ? Calculators.simulatePortfolio(this.project.portfolio, 500) : null;
 
         // Plan
         const plan = Array.isArray(p.plan) ? p.plan : [];
-        const totalDays = plan.reduce((sum, step) => sum + (Number.isFinite(step?.duration) ? step.duration : 0), 0);
+        const totalDays = plan.reduce((sum, step) => sum + NumberUtils.safeNumber(step?.duration, 0), 0);
 
         // Composite (HUB index)
         const hub = this.calculateHubIndex({ finalVerdict, avgSeg, avgOps, portfolioIndex });
@@ -159,6 +159,7 @@ class Report {
         const profitAvg = Math.round((profit.pessimistic + profit.typical + profit.optimistic) / 3);
 
         const summary = this.buildSummary(d);
+        const priorities = this.buildPriorityFixes(d);
 
         return `
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -199,6 +200,13 @@ class Report {
                     <div class="mt-6 p-4 bg-gray-50 rounded-lg">
                         <div class="text-sm font-medium text-gray-700 mb-2">Краткое резюме</div>
                         <div class="text-gray-900 whitespace-pre-line">${this.esc(summary)}</div>
+                    </div>
+
+                    <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                        <div class="text-sm font-medium text-blue-900 mb-2">Что чинить в первую очередь</div>
+                        <ul class="list-disc pl-5 text-sm text-blue-900 space-y-1">
+                            ${priorities.map(item => `<li>${this.esc(item)}</li>`).join('')}
+                        </ul>
                     </div>
                 </div>
 
@@ -349,7 +357,7 @@ class Report {
                         ${d.plan.steps.map((s, idx) => `
                             <div class="p-3 bg-gray-50 rounded-lg">
                                 <div class="text-sm font-medium text-gray-900">${idx + 1}. ${this.esc((s?.step || '').trim() || '—')}</div>
-                                <div class="text-xs text-gray-600 mt-1">Срок: ${Number.isFinite(s?.duration) ? s.duration : 0} дн.</div>
+                                <div class="text-xs text-gray-600 mt-1">Срок: ${NumberUtils.safeNumber(s?.duration, 0)} дн.</div>
                             </div>
                         `).join('')}
                     </div>
@@ -390,6 +398,7 @@ class Report {
         const v = this.verdictMeta(d.premortem.finalVerdict);
         const profit = d.premortem.profit;
         const profitAvg = Math.round((profit.pessimistic + profit.typical + profit.optimistic) / 3);
+        const priorities = this.buildPriorityFixes(d);
 
         const lines = [
             `PREMORTEM HUB — отчёт: ${d.project.name}`,
@@ -400,6 +409,7 @@ class Report {
             `Операции: ${d.operations.total ?? 0} сцен., ср.индекс ${d.operations.avgIndex ?? '-'}`,
             `Портфель: ${d.portfolio.total ?? 0} идей, индекс ${d.portfolio.index ?? '-'}`,
             `План: ${d.plan.steps.length} шагов, ${d.plan.totalDays} дней`,
+            `Главные правки: ${priorities.join('; ')}`,
             '',
             this.buildSummary(d)
         ];
@@ -440,6 +450,39 @@ class Report {
         }
 
         return parts.join('\n');
+    }
+
+    buildPriorityFixes(d) {
+        const profit = d.premortem.profit;
+        const profitAvg = Math.round((profit.pessimistic + profit.typical + profit.optimistic) / 3);
+
+        const fixes = [];
+
+        if (profitAvg < 0) {
+            fixes.push('Экономика в минус — пересмотреть цену, спрос или расходы.');
+        }
+
+        if (d.premortem.fogi > 40) {
+            fixes.push('Снизить FogI: собрать факты по самым туманным пунктам.');
+        }
+
+        if (d.segments.avgIndex != null && d.segments.avgIndex < 50) {
+            fixes.push('Уточнить сегменты: выбрать 1–2 наиболее живых группы и проверить спрос.');
+        }
+
+        if (d.operations.avgIndex != null && d.operations.avgIndex < 50) {
+            fixes.push('Операции: увеличить мощность или уменьшить поток, чтобы ρ < 0.9.');
+        }
+
+        if (d.portfolio.index != null && d.portfolio.index < 50) {
+            fixes.push('Портфель: убрать слабые идеи или перераспределить доли.');
+        }
+
+        if (!fixes.length) {
+            fixes.push('Критичных дыр не видно — двигайтесь по плану и тестируйте гипотезы.');
+        }
+
+        return fixes.slice(0, 3);
     }
 
     findWeakest(d) {
@@ -520,12 +563,12 @@ class Report {
     // ---------- Utils ----------
 
     fmtMoney(n) {
-        const v = Number.isFinite(n) ? Math.round(n) : 0;
-        return v.toLocaleString('ru-RU') + ' ₽';
+        const v = NumberUtils.safeNumber(n, 0);
+        return NumberUtils.formatNumber(Math.round(v)) + ' ₽';
     }
 
     clamp100(n) {
-        const v = Number.isFinite(n) ? n : 0;
+        const v = NumberUtils.safeNumber(n, 0);
         return Math.max(0, Math.min(100, Math.round(v)));
     }
 

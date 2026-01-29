@@ -4,7 +4,7 @@ class Calculators {
 
     // Расчет сценариев прибыли (P = (Price - Expenses) * Demand)
     static calculateProfitScenarios(economics) {
-        const safe = (v) => (Number.isFinite(v) ? v : 0);
+        const safe = (v) => NumberUtils.safeNumber(v, 0);
         const price = economics?.price || { min: 0, typ: 0, max: 0 };
         const demand = economics?.demand || { min: 0, typ: 0, max: 0 };
         const expenses = economics?.expenses || { min: 0, typ: 0, max: 0 };
@@ -25,7 +25,7 @@ class Calculators {
 
     // Вердикт
     static calculateVerdict(profitScenarios, fogI, illI) {
-        const safe = (v) => (Number.isFinite(v) ? v : 0);
+        const safe = (v) => NumberUtils.safeNumber(v, 0);
         const p = profitScenarios || { pessimistic: 0, typical: 0, optimistic: 0 };
         const avgProfit = (safe(p.pessimistic) + safe(p.typical) + safe(p.optimistic)) / 3;
 
@@ -50,8 +50,8 @@ class Calculators {
             (m.reach ?? 0)
         ) / 4;
 
-        const volume = Number.isFinite(segment.volume) ? segment.volume : 0;
-        const frequency = Number.isFinite(segment.frequency) ? segment.frequency : 0;
+        const volume = NumberUtils.safeNumber(segment.volume, 0);
+        const frequency = NumberUtils.safeNumber(segment.frequency, 0);
 
         // Небольшие ограничители, чтобы индекс не улетал в космос
         const volumeFactor = Math.min(volume / 1000, 2);
@@ -65,12 +65,12 @@ class Calculators {
     // M/M/1 приближение (очень грубо, но полезно как сигнал)
     static calculateQueueMetrics(demand, resources) {
         const res = Array.isArray(resources) ? resources : [];
-        const safe = (v) => (Number.isFinite(v) ? v : 0);
+        const safe = (v) => NumberUtils.safeNumber(v, 0);
 
         const totalCapacity = res.reduce((sum, r) => {
             const cap = safe(r?.capacity);
-            const rel = Number.isFinite(r?.reliability) ? r.reliability : 1;
-            return sum + cap * Math.max(0, Math.min(rel, 1));
+            const rel = NumberUtils.clamp(r?.reliability, 0, 1, 1);
+            return sum + cap * rel;
         }, 0);
 
         if (totalCapacity <= 0) {
@@ -100,7 +100,7 @@ class Calculators {
 
         const res = Array.isArray(resources) ? resources : [];
         const avgReliability = res.length
-            ? res.reduce((sum, r) => sum + (Number.isFinite(r?.reliability) ? r.reliability : 1), 0) / res.length
+            ? res.reduce((sum, r) => sum + NumberUtils.clamp(r?.reliability, 0, 1, 1), 0) / res.length
             : 0;
 
         if (rho === Infinity || wq === Infinity || res.length === 0) return 0;
@@ -117,9 +117,9 @@ class Calculators {
 
     static _triangular(min, mode, max) {
         // защищаемся от мусора
-        const a = Number.isFinite(min) ? min : 0;
-        const b = Number.isFinite(mode) ? mode : 0;
-        const c = Number.isFinite(max) ? max : 0;
+        const a = NumberUtils.safeNumber(min, 0);
+        const b = NumberUtils.safeNumber(mode, 0);
+        const c = NumberUtils.safeNumber(max, 0);
 
         // если заданы криво — сортируем
         const lo = Math.min(a, b, c);
@@ -161,11 +161,11 @@ class Calculators {
                 let revenue = this._triangular(pessimistic, typical, optimistic);
 
                 // риск 0..1 (как в UI)
-                const risk = Number.isFinite(idea?.risk) ? Math.max(0, Math.min(idea.risk, 1)) : 0;
+                const risk = NumberUtils.clamp(idea?.risk, 0, 1, 0);
                 revenue *= (1 - risk);
 
-                const weight = Number.isFinite(idea?.weight) ? Math.max(0, idea.weight) : 1;
-                total += revenue * weight;
+                const weight = NumberUtils.safeNumber(idea?.weight, 1);
+                total += revenue * Math.max(0, weight);
             }
 
             results.push(total);
@@ -195,9 +195,9 @@ class Calculators {
 
         const simulation = this.simulatePortfolio(portfolio);
 
-        const avgRisk = ideas.reduce((sum, idea) => sum + (Number.isFinite(idea?.risk) ? idea.risk : 0), 0) / ideas.length;
-        const avgLoad = ideas.reduce((sum, idea) => sum + (Number.isFinite(idea?.load) ? idea.load : 0), 0) / ideas.length;
-        const avgTime = ideas.reduce((sum, idea) => sum + (Number.isFinite(idea?.time) ? idea.time : 0), 0) / ideas.length;
+        const avgRisk = ideas.reduce((sum, idea) => sum + NumberUtils.safeNumber(idea?.risk, 0), 0) / ideas.length;
+        const avgLoad = ideas.reduce((sum, idea) => sum + NumberUtils.safeNumber(idea?.load, 0), 0) / ideas.length;
+        const avgTime = ideas.reduce((sum, idea) => sum + NumberUtils.safeNumber(idea?.time, 0), 0) / ideas.length;
 
         const revenueScore = Math.min(Math.max((simulation.mean / 100000) * 30, 0), 30);
         const riskScore = Math.max(0, (1 - avgRisk) * 25);

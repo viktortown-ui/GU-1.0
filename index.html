@@ -2,16 +2,79 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>PREMORTEM HUB</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            color-scheme: light;
+        }
+        .safe-area {
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .hint {
+            position: relative;
+            width: 18px;
+            height: 18px;
+            border-radius: 999px;
+            background: #e5e7eb;
+            color: #374151;
+            font-size: 11px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #d1d5db;
+        }
+        .hint::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 130%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #111827;
+            color: #fff;
+            padding: 6px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.15s ease;
+            z-index: 20;
+        }
+        .hint:focus-visible::after,
+        .hint:hover::after {
+            opacity: 1;
+        }
+        :focus-visible {
+            outline: 3px solid rgba(59, 130, 246, 0.4);
+            outline-offset: 2px;
+        }
+        @media (max-width: 768px) {
+            .header-actions {
+                flex-wrap: wrap;
+                justify-content: flex-start;
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                scroll-behavior: auto !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-gray-50 min-h-screen safe-area">
     <!-- Шапка -->
     <header class="bg-white shadow-sm border-b">
         <div class="max-w-7xl mx-auto px-4 py-4">
-            <div class="flex items-center justify-between">
+            <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div class="flex items-center space-x-3">
                     <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
                         <i class="fas fa-brain text-white text-xl"></i>
@@ -21,7 +84,7 @@
                         <p class="text-sm text-gray-500">Система предпроектной аналитики</p>
                     </div>
                 </div>
-                <div class="flex items-center space-x-3">
+                <div class="flex items-center space-x-3 header-actions">
                     <button id="helpBtn" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors" title="Инструкция">
                         <i class="fas fa-circle-question mr-2"></i>Инструкция
                     </button>
@@ -37,17 +100,32 @@
     </header>
 
     <!-- Основной контент -->
-    <main class="max-w-7xl mx-auto px-4 py-8">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         <!-- Приветственный блок -->
         <div id="welcomeBlock" class="text-center py-12">
             <div class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
                 <i class="fas fa-lightbulb text-blue-600 text-4xl"></i>
             </div>
-            <h2 class="text-3xl font-bold text-gray-900 mb-4">Добро пожаловать в PREMORTEM HUB</h2>
-            <p class="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-                Начните с создания нового проекта. Используйте системный подход к анализу идей, 
-                сегментации рынка и оценке операционной устойчивости.
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">PREMORTEM HUB — инструмент принятия решения по идее</h2>
+            <p class="text-lg text-gray-600 mb-8 max-w-3xl mx-auto">
+                Это не тест и не опросник. HUB помогает быстро увидеть экономику, туман, иллюзии и узкие места,
+                чтобы понять: <b>двигаемся дальше</b> или <b>сначала проверяем гипотезы</b>.
             </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto mb-8 text-left">
+                <div class="bg-white rounded-lg border p-4 shadow-sm">
+                    <div class="text-sm font-semibold text-gray-900 mb-1">Кому нужно</div>
+                    <div class="text-sm text-gray-600">Предпринимателю, самозанятому, руководителю, у кого 1–3 идеи и мало времени.</div>
+                </div>
+                <div class="bg-white rounded-lg border p-4 shadow-sm">
+                    <div class="text-sm font-semibold text-gray-900 mb-1">Зачем</div>
+                    <div class="text-sm text-gray-600">Понять экономику, найти слабые места, получить план действий на 1–2 недели.</div>
+                </div>
+                <div class="bg-white rounded-lg border p-4 shadow-sm">
+                    <div class="text-sm font-semibold text-gray-900 mb-1">Как пользоваться</div>
+                    <div class="text-sm text-gray-600">Маршрут по умолчанию: <b>Premortem Lite → Отчёт</b>. Остальные вкладки — углубление при необходимости.</div>
+                </div>
+            </div>
             <button id="createFirstBtn" class="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-lg font-medium">
                 <i class="fas fa-plus mr-2"></i>Создать первый проект
             </button>
@@ -381,6 +459,7 @@
     </footer>
 
     <!-- Скрипты -->
+    <script src="utils/NumberUtils.js"></script>
     <script src="utils/Storage.js"></script>
     <script src="utils/ExportImport.js"></script>
     <script src="utils/Calculators.js"></script>
