@@ -18,7 +18,7 @@ class PremortemHub {
         if (this.isAppPage()) {
             this.loadProject();
             this.initModules();
-            this.collapseInfoCardsOnMobile();
+            this.initInfoCards();
         } else {
             this.loadProjectsList();
         }
@@ -228,12 +228,50 @@ class PremortemHub {
         window.addEventListener('beforeunload', () => this.persistProject(true));
     }
 
-    collapseInfoCardsOnMobile() {
-        const isMobile = window.matchMedia('(max-width: 768px)').matches;
-        if (!isMobile) return;
-        document.querySelectorAll('.info-card').forEach(card => {
-            card.removeAttribute('open');
+    initInfoCards() {
+        const cards = document.querySelectorAll('.info-card');
+        if (!cards.length) return;
+
+        const isMobile = window.matchMedia('(max-width: 420px)').matches;
+        const isDesktop = window.matchMedia('(min-width: 768px)').matches;
+
+        cards.forEach((card, index) => {
+            const id = card.dataset.infoId || `info-${index}`;
+            card.dataset.infoId = id;
+            const storageKey = `info-card:${id}`;
+            const savedState = localStorage.getItem(storageKey);
+
+            let shouldOpen = card.hasAttribute('open');
+            if (savedState === 'open') {
+                shouldOpen = true;
+            } else if (savedState === 'closed') {
+                shouldOpen = false;
+            } else if (isMobile) {
+                shouldOpen = false;
+            } else if (isDesktop) {
+                shouldOpen = true;
+            }
+
+            if (shouldOpen) {
+                card.setAttribute('open', '');
+            } else {
+                card.removeAttribute('open');
+            }
+
+            this.updateInfoCardToggle(card);
+
+            card.addEventListener('toggle', () => {
+                const isOpen = card.hasAttribute('open');
+                localStorage.setItem(storageKey, isOpen ? 'open' : 'closed');
+                this.updateInfoCardToggle(card);
+            });
         });
+    }
+
+    updateInfoCardToggle(card) {
+        const toggle = card.querySelector('.info-card__toggle');
+        if (!toggle) return;
+        toggle.textContent = card.hasAttribute('open') ? 'Скрыть ↑' : 'Показать ↓';
     }
 
     showCreateModal() {
