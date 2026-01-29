@@ -167,12 +167,10 @@ class Segments {
     }
 
     renderSegmentCard(segment) {
-        const scoresOpen = window.matchMedia('(min-width: 768px)').matches;
         return `
             <div class="segment-card bg-white border border-gray-200 rounded-lg p-4 space-y-4" data-segment-id="${segment.id}">
-                <div class="segment-card__header flex items-center justify-between gap-3">
-                    <div class="flex flex-1 items-center gap-2">
-                        <span class="segment-index-badge">#${segment.index || 0}</span>
+                <div class="segment-card__header space-y-3">
+                    <div class="flex items-start justify-between gap-3">
                         <input
                             type="text"
                             class="segment-name flex-1 text-base font-semibold text-gray-900 bg-transparent border-b border-transparent focus:border-blue-500 focus:outline-none"
@@ -180,26 +178,26 @@ class Segments {
                             placeholder="Название сегмента"
                             onchange="app.modules.segments.updateSegment(${segment.id}, 'name', this.value)"
                         />
+                        <span class="segment-index-badge">Индекс: ${segment.index || 0}</span>
                     </div>
-                    <button
-                        onclick="app.modules.segments.deleteSegment(${segment.id})"
-                        class="px-2 py-1 rounded-lg border border-red-200 text-red-500 hover:text-red-700 hover:border-red-300 transition-colors"
-                        title="Удалить сегмент"
-                    >
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-
-                <div class="flex items-center justify-between text-sm text-gray-600">
-                    <label class="flex items-center gap-2">
-                        <input
-                            type="checkbox"
-                            class="segment-check"
-                            ${segment.checked ? 'checked' : ''}
-                            onchange="app.modules.segments.toggleSegment(${segment.id})"
-                        />
-                        Активен
-                    </label>
+                    <div class="segment-card__actions flex items-center justify-between gap-3">
+                        <label class="segment-toggle text-sm text-gray-600">
+                            <input
+                                type="checkbox"
+                                class="segment-check"
+                                ${segment.checked ? 'checked' : ''}
+                                onchange="app.modules.segments.toggleSegment(${segment.id})"
+                            />
+                            Активен
+                        </label>
+                        <button
+                            onclick="app.modules.segments.deleteSegment(${segment.id})"
+                            class="segment-delete-btn rounded-lg border border-red-200 text-red-500 hover:text-red-700 hover:border-red-300 transition-colors"
+                            title="Удалить сегмент"
+                        >
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
@@ -226,7 +224,7 @@ class Segments {
                     </label>
                 </div>
 
-                <details class="segment-scores bg-gray-50 rounded-lg p-3" ${scoresOpen ? 'open' : ''}>
+                <details class="segment-scores bg-gray-50 rounded-lg p-3">
                     <summary class="flex items-center justify-between text-xs font-semibold text-gray-700">
                         <span>Оценки сегмента</span>
                         <span class="segment-scores__toggle"></span>
