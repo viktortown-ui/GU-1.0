@@ -55,6 +55,9 @@ class Operations {
         const rhoClass = this.getRhoBadgeClass(metrics.rho);
         const rhoValue = metrics.rho === Infinity ? '∞' : metrics.rho;
         const wqValue = metrics.wq === Infinity ? '∞' : metrics.wq;
+        const rhoPercent = this.getRhoPercent(metrics.rho);
+        const wqPercent = this.getWqPercent(metrics.wq);
+        const indexPercent = this.getIndexPercent(index);
 
         return `
             <div class="bg-white border border-gray-200 rounded-lg p-6 space-y-6 scenario-card" data-scenario-id="${scenario.id}">
@@ -110,9 +113,24 @@ class Operations {
                 <div class="scenario-results bg-white border border-gray-200 rounded-lg p-4">
                     <h4 class="font-medium text-gray-900 mb-3">Результаты</h4>
                     <div class="results-chips flex flex-wrap gap-2">
-                        <span class="metric-badge metric-rho ${rhoClass}">ρ: ${rhoValue}</span>
-                        <span class="metric-badge metric-wq">Wq: ${wqValue}</span>
-                        <span class="metric-badge metric-index">Индекс: ${index}</span>
+                        <span class="metric-badge metric-rho ${rhoClass}">
+                            <span class="metric-label">ρ: ${rhoValue}</span>
+                            <span class="mini-progress" role="img" aria-label="Загрузка ${rhoValue}">
+                                <span class="mini-progress__fill" style="width: ${rhoPercent}%;"></span>
+                            </span>
+                        </span>
+                        <span class="metric-badge metric-wq">
+                            <span class="metric-label">Wq: ${wqValue}</span>
+                            <span class="mini-progress" role="img" aria-label="Ожидание ${wqValue}" title="Относительный индикатор ожидания: чем меньше — тем лучше">
+                                <span class="mini-progress__fill" style="width: ${wqPercent}%;"></span>
+                            </span>
+                        </span>
+                        <span class="metric-badge metric-index">
+                            <span class="metric-label">Индекс: ${index}</span>
+                            <span class="mini-progress" role="img" aria-label="Индекс устойчивости ${index}">
+                                <span class="mini-progress__fill" style="width: ${indexPercent}%;"></span>
+                            </span>
+                        </span>
                     </div>
                 </div>
             </div>
@@ -264,17 +282,40 @@ class Operations {
 
             const card = document.querySelector(`[data-scenario-id="${scenarioId}"]`);
             if (card) {
+                const rhoLabel = card.querySelector('.metric-rho .metric-label');
+                const wqLabel = card.querySelector('.metric-wq .metric-label');
+                const idxLabel = card.querySelector('.metric-index .metric-label');
                 const rhoEl = card.querySelector('.metric-rho');
-                const wqEl = card.querySelector('.metric-wq');
-                const idxEl = card.querySelector('.metric-index');
+                const rhoBar = card.querySelector('.metric-rho .mini-progress__fill');
+                const wqBar = card.querySelector('.metric-wq .mini-progress__fill');
+                const idxBar = card.querySelector('.metric-index .mini-progress__fill');
+                const rhoPercent = this.getRhoPercent(metrics.rho);
+                const wqPercent = this.getWqPercent(metrics.wq);
+                const indexPercent = this.getIndexPercent(newIndex);
 
+                if (rhoLabel) {
+                    rhoLabel.textContent = `ρ: ${metrics.rho === Infinity ? '∞' : metrics.rho}`;
+                }
                 if (rhoEl) {
-                    rhoEl.textContent = `ρ: ${metrics.rho === Infinity ? '∞' : metrics.rho}`;
                     rhoEl.classList.remove('metric-badge--success', 'metric-badge--warning', 'metric-badge--danger');
                     rhoEl.classList.add(this.getRhoBadgeClass(metrics.rho));
                 }
-                if (wqEl) wqEl.textContent = `Wq: ${metrics.wq === Infinity ? '∞' : metrics.wq}`;
-                if (idxEl) idxEl.textContent = `Индекс: ${newIndex}`;
+                if (wqLabel) wqLabel.textContent = `Wq: ${metrics.wq === Infinity ? '∞' : metrics.wq}`;
+                if (idxLabel) idxLabel.textContent = `Индекс: ${newIndex}`;
+                if (rhoBar) rhoBar.style.width = `${rhoPercent}%`;
+                if (wqBar) wqBar.style.width = `${wqPercent}%`;
+                if (idxBar) idxBar.style.width = `${indexPercent}%`;
+                if (rhoBar?.parentElement) {
+                    const value = metrics.rho === Infinity ? '∞' : metrics.rho;
+                    rhoBar.parentElement.setAttribute('aria-label', `Загрузка ${value}`);
+                }
+                if (wqBar?.parentElement) {
+                    const value = metrics.wq === Infinity ? '∞' : metrics.wq;
+                    wqBar.parentElement.setAttribute('aria-label', `Ожидание ${value}`);
+                }
+                if (idxBar?.parentElement) {
+                    idxBar.parentElement.setAttribute('aria-label', `Индекс устойчивости ${newIndex}`);
+                }
             }
 
             // Also refresh global index
@@ -314,6 +355,22 @@ class Operations {
         if (value < 0.7) return 'metric-badge--success';
         if (value <= 0.85) return 'metric-badge--warning';
         return 'metric-badge--danger';
+    }
+
+    getRhoPercent(rho) {
+        if (rho === Infinity) return 100;
+        return NumberUtils.clamp(rho, 0, 1, 0) * 100;
+    }
+
+    getWqPercent(wq) {
+        if (wq === Infinity) return 100;
+        const safeValue = NumberUtils.safeNumber(wq, 0);
+        const normalized = Math.log1p(Math.max(0, safeValue)) / Math.log1p(10);
+        return Math.min(Math.max(normalized, 0), 1) * 100;
+    }
+
+    getIndexPercent(index) {
+        return NumberUtils.clamp(index, 0, 100, 0);
     }
 
     save() {

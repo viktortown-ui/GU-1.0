@@ -181,9 +181,35 @@
             background: #eff6ff;
             color: #1d4ed8;
         }
+        .metric-badge .mini-progress {
+            width: 2.5rem;
+        }
+        .mini-progress {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            width: 2.75rem;
+            height: 0.35rem;
+            border-radius: 999px;
+            background: rgba(59, 130, 246, 0.18);
+            overflow: hidden;
+        }
+        .mini-progress__fill {
+            display: block;
+            height: 100%;
+            width: 0;
+            border-radius: inherit;
+            background: currentColor;
+            transition: width 0.2s ease;
+        }
+        .mini-progress--compact {
+            width: 2.25rem;
+            height: 0.3rem;
+        }
         .segment-index-badge {
             display: inline-flex;
             align-items: center;
+            gap: 0.35rem;
             padding: 0.15rem 0.5rem;
             border-radius: 999px;
             background: #eff6ff;
@@ -207,9 +233,13 @@
             min-height: 44px;
         }
         .resource-card__header {
-            display: flex;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
             align-items: flex-start;
             gap: 0.75rem;
+        }
+        .resource-name {
+            min-width: 0;
         }
         .resource-metrics-grid {
             display: grid;
@@ -222,8 +252,8 @@
             gap: 0.4rem;
         }
         .resource-delete {
-            width: 2.5rem;
-            height: 2.5rem;
+            width: 2.75rem;
+            height: 2.75rem;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -233,6 +263,33 @@
         .scenario-delete {
             min-width: 44px;
             min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .scenario-card__header {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+        .scenario-card__header,
+        .resource-card__header {
+            min-width: 0;
+        }
+        .scenario-title {
+            min-width: 0;
+        }
+        .scenario-delete:focus-visible,
+        .resource-delete:focus-visible,
+        .segment-delete-btn:focus-visible {
+            outline: 2px solid #2563eb;
+            outline-offset: 2px;
+        }
+        .scenario-delete:active,
+        .resource-delete:active,
+        .segment-delete-btn:active {
+            transform: scale(0.98);
         }
         .results-chips .metric-badge {
             font-size: 0.75rem;
@@ -265,6 +322,9 @@
         html[data-theme="dark"] .metric-badge--danger {
             background: rgba(239, 68, 68, 0.2);
             color: #fca5a5;
+        }
+        html[data-theme="dark"] .mini-progress {
+            background: rgba(148, 163, 184, 0.35);
         }
         .segments-cards {
             display: none;

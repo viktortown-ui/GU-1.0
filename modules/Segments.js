@@ -167,6 +167,9 @@ class Segments {
     }
 
     renderSegmentCard(segment) {
+        const indexValue = NumberUtils.safeNumber(segment.index, 0);
+        const indexPercent = NumberUtils.clamp(indexValue, 0, 100, 0);
+
         return `
             <div class="segment-card bg-white border border-gray-200 rounded-lg p-4 space-y-4" data-segment-id="${segment.id}">
                 <div class="segment-card__header space-y-3">
@@ -178,7 +181,12 @@ class Segments {
                             placeholder="Название сегмента"
                             onchange="app.modules.segments.updateSegment(${segment.id}, 'name', this.value)"
                         />
-                        <span class="segment-index-badge">Индекс: ${segment.index || 0}</span>
+                        <span class="segment-index-badge">
+                            <span>Индекс: ${indexValue}</span>
+                            <span class="mini-progress mini-progress--compact" role="img" aria-label="Индекс ${indexValue}">
+                                <span class="mini-progress__fill" style="width: ${indexPercent}%;"></span>
+                            </span>
+                        </span>
                     </div>
                     <div class="segment-card__actions flex items-center justify-between gap-3">
                         <label class="segment-toggle text-sm text-gray-600">
