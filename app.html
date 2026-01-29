@@ -118,12 +118,37 @@
         .info-card summary {
             cursor: pointer;
             list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            width: 100%;
         }
         .info-card summary::-webkit-details-marker {
             display: none;
         }
-        .info-card[open] summary {
-            margin-bottom: 0.5rem;
+        .info-card__toggle {
+            white-space: nowrap;
+        }
+        .info-card__content {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+        }
+        .info-card[open] .info-card__content {
+            max-height: 520px;
+            opacity: 1;
+        }
+        .info-card__body {
+            padding-top: 0.5rem;
+        }
+        .segment-scores summary {
+            cursor: pointer;
+            list-style: none;
+        }
+        .segment-scores summary::-webkit-details-marker {
+            display: none;
         }
         .mobile-scroll-hint {
             display: none;
@@ -155,6 +180,45 @@
             font-weight: 600;
             background: #eff6ff;
             color: #1d4ed8;
+        }
+        .segment-index-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-size: 0.7rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .resource-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .resource-row__header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex: 1;
+        }
+        .resource-row__metrics {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .resource-field {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .resource-delete {
+            width: 2rem;
+            height: 2rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
         .metric-badge--success {
             background: #dcfce7;
@@ -265,6 +329,20 @@
             .segments-cards {
                 display: block;
             }
+            .segment-card {
+                padding: 0.75rem;
+                gap: 0.75rem;
+            }
+            .segment-card__header {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+            .segment-scores__toggle::after {
+                content: "Показать ↓";
+            }
+            .segment-scores[open] .segment-scores__toggle::after {
+                content: "Скрыть ↑";
+            }
         }
         @media (max-width: 420px) {
             .module-nav {
@@ -276,10 +354,60 @@
             body.has-bottom-nav main {
                 padding-bottom: 6.5rem;
             }
-        }
-        @media (max-width: 640px) {
-            .mobile-scroll-hint {
-                display: block;
+            body {
+                overflow-x: hidden;
+            }
+            .scenario-card {
+                padding: 1rem;
+                gap: 1rem;
+            }
+            .scenario-section {
+                padding: 0.75rem;
+            }
+            .resource-row {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+                max-width: 100%;
+            }
+            .resource-row__header {
+                position: relative;
+            }
+            .resource-name {
+                width: 100% !important;
+                box-sizing: border-box;
+                padding-right: 2.75rem;
+            }
+            .resource-row__metrics {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 0.5rem;
+                width: 100%;
+            }
+            .resource-row__metrics input {
+                width: 100% !important;
+                box-sizing: border-box;
+            }
+            .resource-delete {
+                position: absolute;
+                top: 0.25rem;
+                right: 0.25rem;
+                width: 2.5rem;
+                height: 2.5rem;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0;
+            }
+            .resource-row input,
+            .resource-row label {
+                max-width: 100%;
+            }
+            .scenario-card input,
+            .scenario-card textarea,
+            .scenario-card select {
+                max-width: 100%;
+                box-sizing: border-box;
             }
         }
         @media (prefers-reduced-motion: reduce) {
@@ -365,18 +493,20 @@
                 <p class="text-gray-600">Системный анализ идеи от клиента до плана действий</p>
             </div>
 
-            <details class="info-card bg-white rounded-lg shadow-sm border p-4 mb-6" open>
-                <summary class="flex items-center justify-between text-sm font-semibold text-gray-900">
+            <details class="info-card bg-white rounded-lg shadow-sm border p-4 mb-6" data-info-id="premortem-intro" open>
+                <summary class="text-sm font-semibold text-gray-900">
                     <span>Что это и как использовать</span>
-                    <span class="text-xs text-gray-500">Свернуть/развернуть</span>
+                    <span class="info-card__toggle text-xs text-gray-500">Показать ↓</span>
                 </summary>
-                <div class="text-sm text-gray-600 space-y-1">
-                    <div>• Что это: короткий маршрут проверки идеи за 7 шагов.</div>
-                    <div>• Кому нужно: если хотите быстро понять, «летит» ли идея.</div>
-                    <div>• Когда использовать: в начале проекта или перед крупным решением.</div>
-                    <div>• Что вводить: описания, диапазоны цифр, факты/неизвестные.</div>
-                    <div>• Как читать результат: вердикт + план — это подсказка, куда копать.</div>
-                    <div>• Маршрут по умолчанию: Premortem → Отчёт.</div>
+                <div class="info-card__content">
+                    <div class="info-card__body text-sm text-gray-600 space-y-1">
+                        <div>• Что это: короткий маршрут проверки идеи за 7 шагов.</div>
+                        <div>• Кому нужно: если хотите быстро понять, «летит» ли идея.</div>
+                        <div>• Когда использовать: в начале проекта или перед крупным решением.</div>
+                        <div>• Что вводить: описания, диапазоны цифр, факты/неизвестные.</div>
+                        <div>• Как читать результат: вердикт + план — это подсказка, куда копать.</div>
+                        <div>• Маршрут по умолчанию: Premortem → Отчёт.</div>
+                    </div>
                 </div>
             </details>
             
@@ -433,18 +563,20 @@
                 </div>
             </div>
 
-            <details class="info-card bg-white rounded-lg shadow-sm border p-4 mb-6" open>
-                <summary class="flex items-center justify-between text-sm font-semibold text-gray-900">
+            <details class="info-card bg-white rounded-lg shadow-sm border p-4 mb-6" data-info-id="report-intro" open>
+                <summary class="text-sm font-semibold text-gray-900">
                     <span>Что это и как читать</span>
-                    <span class="text-xs text-gray-500">Свернуть/развернуть</span>
+                    <span class="info-card__toggle text-xs text-gray-500">Показать ↓</span>
                 </summary>
-                <div class="text-sm text-gray-600 space-y-1">
-                    <div>• Что это: одна страница, где собраны все ключевые выводы.</div>
-                    <div>• Кому нужно: тем, кто принимает решение или рассказывает о проекте.</div>
-                    <div>• Когда использовать: после Premortem Lite или перед обсуждением с партнёром.</div>
-                    <div>• Что вводить: ничего — отчёт собирает всё автоматически.</div>
-                    <div>• Как читать: сверху резюме, ниже слабые места и модули.</div>
-                    <div>• Копировать кратко: готовая выжимка для Telegram.</div>
+                <div class="info-card__content">
+                    <div class="info-card__body text-sm text-gray-600 space-y-1">
+                        <div>• Что это: одна страница, где собраны все ключевые выводы.</div>
+                        <div>• Кому нужно: тем, кто принимает решение или рассказывает о проекте.</div>
+                        <div>• Когда использовать: после Premortem Lite или перед обсуждением с партнёром.</div>
+                        <div>• Что вводить: ничего — отчёт собирает всё автоматически.</div>
+                        <div>• Как читать: сверху резюме, ниже слабые места и модули.</div>
+                        <div>• Копировать кратко: готовая выжимка для Telegram.</div>
+                    </div>
                 </div>
             </details>
 
@@ -460,18 +592,20 @@
                 <p class="text-gray-600">Анализ целевых сегментов и их оценка</p>
             </div>
 
-            <details class="info-card bg-white rounded-lg shadow-sm border p-4 mb-6" open>
-                <summary class="flex items-center justify-between text-sm font-semibold text-gray-900">
+            <details class="info-card bg-white rounded-lg shadow-sm border p-4 mb-6" data-info-id="segments-intro" open>
+                <summary class="text-sm font-semibold text-gray-900">
                     <span>Что это и как использовать</span>
-                    <span class="text-xs text-gray-500">Свернуть/развернуть</span>
+                    <span class="info-card__toggle text-xs text-gray-500">Показать ↓</span>
                 </summary>
-                <div class="text-sm text-gray-600 space-y-1">
-                    <div>• Что это: таблица сегментов, чтобы выбрать самых живых клиентов.</div>
-                    <div>• Кому нужно: если не ясно, кому продавать в первую очередь.</div>
-                    <div>• Когда использовать: после Premortem Lite, перед тестом продаж.</div>
-                    <div>• Что вводить: объём, частоту и 4 оценки по шкале 1–5.</div>
-                    <div>• Как читать результат: индекс — это приоритет тестирования, а не истина.</div>
-                    <div>• Советы: не ставьте всем «5», иначе модель не различит сегменты.</div>
+                <div class="info-card__content">
+                    <div class="info-card__body text-sm text-gray-600 space-y-1">
+                        <div>• Что это: таблица сегментов, чтобы выбрать самых живых клиентов.</div>
+                        <div>• Кому нужно: если не ясно, кому продавать в первую очередь.</div>
+                        <div>• Когда использовать: после Premortem Lite, перед тестом продаж.</div>
+                        <div>• Что вводить: объём, частоту и 4 оценки по шкале 1–5.</div>
+                        <div>• Как читать результат: индекс — это приоритет тестирования, а не истина.</div>
+                        <div>• Советы: не ставьте всем «5», иначе модель не различит сегменты.</div>
+                    </div>
                 </div>
             </details>
             
@@ -526,18 +660,20 @@
                 <p class="text-gray-600">Анализ спроса, ресурсов и надежности</p>
             </div>
 
-            <details class="info-card bg-white rounded-lg shadow-sm border p-4 mb-6" open>
-                <summary class="flex items-center justify-between text-sm font-semibold text-gray-900">
+            <details class="info-card bg-white rounded-lg shadow-sm border p-4 mb-6" data-info-id="operations-intro" open>
+                <summary class="text-sm font-semibold text-gray-900">
                     <span>Что это и как использовать</span>
-                    <span class="text-xs text-gray-500">Свернуть/развернуть</span>
+                    <span class="info-card__toggle text-xs text-gray-500">Показать ↓</span>
                 </summary>
-                <div class="text-sm text-gray-600 space-y-1">
-                    <div>• Что это: проверка, выдержит ли команда/процесс поток заявок.</div>
-                    <div>• Кому нужно: если боитесь «продал → утонул».</div>
-                    <div>• Когда использовать: после первых продаж или при росте спроса.</div>
-                    <div>• Что вводить: спрос (заявки/час) и мощность ресурсов.</div>
-                    <div>• Как читать: ρ &gt; 0.9 = очередь растёт, нужно менять процесс.</div>
-                    <div>• Советы: добавьте 2–3 сценария (база/рост/поломка).</div>
+                <div class="info-card__content">
+                    <div class="info-card__body text-sm text-gray-600 space-y-1">
+                        <div>• Что это: проверка, выдержит ли команда/процесс поток заявок.</div>
+                        <div>• Кому нужно: если боитесь «продал → утонул».</div>
+                        <div>• Когда использовать: после первых продаж или при росте спроса.</div>
+                        <div>• Что вводить: спрос (заявки/час) и мощность ресурсов.</div>
+                        <div>• Как читать: ρ &gt; 0.9 = очередь растёт, нужно менять процесс.</div>
+                        <div>• Советы: добавьте 2–3 сценария (база/рост/поломка).</div>
+                    </div>
                 </div>
             </details>
             
@@ -568,18 +704,20 @@
                 <p class="text-gray-600">Управление портфелем проектов с оценкой рисков</p>
             </div>
 
-            <details class="info-card bg-white rounded-lg shadow-sm border p-4 mb-6" open>
-                <summary class="flex items-center justify-between text-sm font-semibold text-gray-900">
+            <details class="info-card bg-white rounded-lg shadow-sm border p-4 mb-6" data-info-id="portfolio-intro" open>
+                <summary class="text-sm font-semibold text-gray-900">
                     <span>Что это и как использовать</span>
-                    <span class="text-xs text-gray-500">Свернуть/развернуть</span>
+                    <span class="info-card__toggle text-xs text-gray-500">Показать ↓</span>
                 </summary>
-                <div class="text-sm text-gray-600 space-y-1">
-                    <div>• Что это: сравнение нескольких идей, чтобы не ставить всё на одну карту.</div>
-                    <div>• Кому нужно: если идей много и нужно выбрать 1–2.</div>
-                    <div>• Когда использовать: после Premortem Lite для 2+ проектов.</div>
-                    <div>• Что вводить: доходы, риск, нагрузку, время и долю в портфеле.</div>
-                    <div>• Как читать: индекс и симуляция показывают хрупкость портфеля.</div>
-                    <div>• Советы: снижайте риск и перегруз, если худший сценарий опасен.</div>
+                <div class="info-card__content">
+                    <div class="info-card__body text-sm text-gray-600 space-y-1">
+                        <div>• Что это: сравнение нескольких идей, чтобы не ставить всё на одну карту.</div>
+                        <div>• Кому нужно: если идей много и нужно выбрать 1–2.</div>
+                        <div>• Когда использовать: после Premortem Lite для 2+ проектов.</div>
+                        <div>• Что вводить: доходы, риск, нагрузку, время и долю в портфеле.</div>
+                        <div>• Как читать: индекс и симуляция показывают хрупкость портфеля.</div>
+                        <div>• Советы: снижайте риск и перегруз, если худший сценарий опасен.</div>
+                    </div>
                 </div>
             </details>
             

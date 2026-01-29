@@ -57,7 +57,7 @@ class Operations {
         const wqValue = metrics.wq === Infinity ? '∞' : metrics.wq;
 
         return `
-            <div class="bg-white border border-gray-200 rounded-lg p-6 space-y-6" data-scenario-id="${scenario.id}">
+            <div class="bg-white border border-gray-200 rounded-lg p-6 space-y-6 scenario-card" data-scenario-id="${scenario.id}">
                 <div class="flex items-start justify-between gap-4">
                     <input
                         type="text"
@@ -75,7 +75,7 @@ class Operations {
                 </div>
 
                 <div class="space-y-4">
-                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 scenario-section">
                         <div class="flex items-center justify-between mb-3">
                             <h4 class="font-medium text-gray-900 flex items-center gap-2">Вводы ${this.renderHint('Сколько заявок приходит в час. Можно грубо.')}</h4>
                         </div>
@@ -92,7 +92,7 @@ class Operations {
                         </div>
                     </div>
 
-                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 scenario-section">
                         <div class="flex items-center justify-between mb-3">
                             <h4 class="font-medium text-gray-900">Ресурсы</h4>
                             <button
@@ -123,44 +123,48 @@ class Operations {
 
     renderResourceRow(scenarioId, resource, index) {
         return `
-            <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                <input
-                    type="text"
-                    class="resource-name flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Название ресурса"
-                    value="${resource.name || ''}"
-                    onchange="app.modules.operations.updateResource(${scenarioId}, ${index}, 'name', this.value)"
-                />
-                <div class="flex items-center space-x-2">
-                    <label class="text-xs text-gray-600">Мощность:</label>
+            <div class="resource-row p-3 bg-gray-50 rounded-lg">
+                <div class="resource-row__header">
                     <input
-                        type="number"
-                        class="resource-capacity w-20 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        value="${NumberUtils.safeNumber(resource.capacity, 0)}"
-                        min="0"
-                        step="0.1"
-                        onchange="app.modules.operations.updateResource(${scenarioId}, ${index}, 'capacity', NumberUtils.toFloatOrNull(this.value))"
+                        type="text"
+                        class="resource-name flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Название ресурса"
+                        value="${resource.name || ''}"
+                        onchange="app.modules.operations.updateResource(${scenarioId}, ${index}, 'name', this.value)"
                     />
+                    <button
+                        onclick="app.modules.operations.removeResource(${scenarioId}, ${index})"
+                        class="resource-delete rounded-lg border border-red-200 text-red-500 hover:text-red-700 hover:border-red-300 transition-colors"
+                        title="Удалить ресурс"
+                    >
+                        <i class="fas fa-trash text-sm"></i>
+                    </button>
                 </div>
-                <div class="flex items-center space-x-2">
-                    <label class="text-xs text-gray-600">Надежность:</label>
-                    <input
-                        type="number"
-                        class="resource-reliability w-20 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        value="${NumberUtils.clamp(resource.reliability, 0, 1, 0.95)}"
-                        min="0"
-                        max="1"
-                        step="0.01"
-                        onchange="app.modules.operations.updateResource(${scenarioId}, ${index}, 'reliability', NumberUtils.toFloatOrNull(this.value))"
-                    />
+                <div class="resource-row__metrics">
+                    <label class="resource-field text-xs text-gray-600">
+                        Мощность
+                        <input
+                            type="number"
+                            class="resource-capacity w-20 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            value="${NumberUtils.safeNumber(resource.capacity, 0)}"
+                            min="0"
+                            step="0.1"
+                            onchange="app.modules.operations.updateResource(${scenarioId}, ${index}, 'capacity', NumberUtils.toFloatOrNull(this.value))"
+                        />
+                    </label>
+                    <label class="resource-field text-xs text-gray-600">
+                        Надежность
+                        <input
+                            type="number"
+                            class="resource-reliability w-20 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            value="${NumberUtils.clamp(resource.reliability, 0, 1, 0.95)}"
+                            min="0"
+                            max="1"
+                            step="0.01"
+                            onchange="app.modules.operations.updateResource(${scenarioId}, ${index}, 'reliability', NumberUtils.toFloatOrNull(this.value))"
+                        />
+                    </label>
                 </div>
-                <button
-                    onclick="app.modules.operations.removeResource(${scenarioId}, ${index})"
-                    class="px-2 py-1 rounded-lg border border-red-200 text-red-500 hover:text-red-700 hover:border-red-300 transition-colors"
-                    title="Удалить ресурс"
-                >
-                    <i class="fas fa-trash text-sm"></i>
-                </button>
             </div>
         `;
     }

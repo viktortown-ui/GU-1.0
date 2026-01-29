@@ -167,16 +167,20 @@ class Segments {
     }
 
     renderSegmentCard(segment) {
+        const scoresOpen = window.matchMedia('(min-width: 768px)').matches;
         return `
-            <div class="bg-white border border-gray-200 rounded-lg p-4 space-y-4" data-segment-id="${segment.id}">
-                <div class="flex items-center justify-between gap-3">
-                    <input
-                        type="text"
-                        class="segment-name flex-1 text-base font-semibold text-gray-900 bg-transparent border-b border-transparent focus:border-blue-500 focus:outline-none"
-                        value="${segment.name || ''}"
-                        placeholder="Название сегмента"
-                        onchange="app.modules.segments.updateSegment(${segment.id}, 'name', this.value)"
-                    />
+            <div class="segment-card bg-white border border-gray-200 rounded-lg p-4 space-y-4" data-segment-id="${segment.id}">
+                <div class="segment-card__header flex items-center justify-between gap-3">
+                    <div class="flex flex-1 items-center gap-2">
+                        <span class="segment-index-badge">#${segment.index || 0}</span>
+                        <input
+                            type="text"
+                            class="segment-name flex-1 text-base font-semibold text-gray-900 bg-transparent border-b border-transparent focus:border-blue-500 focus:outline-none"
+                            value="${segment.name || ''}"
+                            placeholder="Название сегмента"
+                            onchange="app.modules.segments.updateSegment(${segment.id}, 'name', this.value)"
+                        />
+                    </div>
                     <button
                         onclick="app.modules.segments.deleteSegment(${segment.id})"
                         class="px-2 py-1 rounded-lg border border-red-200 text-red-500 hover:text-red-700 hover:border-red-300 transition-colors"
@@ -196,7 +200,6 @@ class Segments {
                         />
                         Активен
                     </label>
-                    <span class="metric-badge">Индекс: ${segment.index || 0}</span>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
@@ -223,8 +226,11 @@ class Segments {
                     </label>
                 </div>
 
-                <details class="bg-gray-50 rounded-lg p-3">
-                    <summary class="text-xs font-semibold text-gray-700">Оценки сегмента</summary>
+                <details class="segment-scores bg-gray-50 rounded-lg p-3" ${scoresOpen ? 'open' : ''}>
+                    <summary class="flex items-center justify-between text-xs font-semibold text-gray-700">
+                        <span>Оценки сегмента</span>
+                        <span class="segment-scores__toggle"></span>
+                    </summary>
                     <div class="grid grid-cols-2 gap-3 mt-3">
                         <label class="text-xs text-gray-600">
                             Доступность
