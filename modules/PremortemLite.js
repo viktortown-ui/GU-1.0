@@ -4,15 +4,15 @@ class PremortemLite {
         this.project = project;
         this.currentStep = 1;
         this.totalSteps = 7;
-        
+
         this.init();
     }
-    
+
     init() {
         this.bindEvents();
         this.loadStep(this.currentStep);
     }
-    
+
     bindEvents() {
         // Step navigation
         document.querySelectorAll('.step-btn').forEach(btn => {
@@ -23,14 +23,14 @@ class PremortemLite {
                 }
             });
         });
-        
+
         // Prev/Next buttons
         const prevBtn = document.getElementById('prevStep');
         const nextBtn = document.getElementById('nextStep');
-        
+
         if (prevBtn) prevBtn.addEventListener('click', () => this.previousStep());
         if (nextBtn) nextBtn.addEventListener('click', () => this.nextStep());
-        
+
         // Auto-save on input changes
         document.addEventListener('input', (e) => {
             // Only when Premortem module is visible
@@ -47,51 +47,52 @@ class PremortemLite {
             if (this.currentStep === 7) this.updateTotalDuration();
 
             this.save();
+            if (window.app) window.app.persistProject(true);
         });
     }
-    
+
     goToStep(step) {
         if (step < 1 || step > this.totalSteps) return;
-        
+
         this.saveCurrentStep();
         this.currentStep = step;
         this.loadStep(step);
         this.updateNavigation();
     }
-    
+
     nextStep() {
         if (this.currentStep < this.totalSteps) {
             this.goToStep(this.currentStep + 1);
         }
     }
-    
+
     previousStep() {
         if (this.currentStep > 1) {
             this.goToStep(this.currentStep - 1);
         }
     }
-    
+
     updateNavigation() {
         // Update step indicators
         document.querySelectorAll('.step-btn').forEach((btn, index) => {
             const stepNum = index + 1;
             btn.classList.remove('bg-blue-600', 'text-white', 'bg-gray-200', 'text-gray-600');
-            
+
             if (stepNum === this.currentStep) {
                 btn.classList.add('bg-blue-600', 'text-white');
             } else {
                 btn.classList.add('bg-gray-200', 'text-gray-600');
             }
         });
-        
+
         // Update current step display
         const currentStepEl = document.getElementById('currentStep');
         if (currentStepEl) currentStepEl.textContent = this.currentStep;
-        
+
         // Update prev/next buttons
         const prevBtn = document.getElementById('prevStep');
         const nextBtn = document.getElementById('nextStep');
-        
+
         if (prevBtn) prevBtn.disabled = this.currentStep === 1;
         if (nextBtn) {
             nextBtn.disabled = this.currentStep === this.totalSteps;
@@ -102,13 +103,13 @@ class PremortemLite {
             }
         }
     }
-    
+
     loadStep(step) {
         const content = document.getElementById('stepContent');
         if (!content) return;
-        
+
         let html = '';
-        
+
         switch (step) {
             case 1:
                 html = this.renderStep1();
@@ -132,7 +133,7 @@ class PremortemLite {
                 html = this.renderStep7();
                 break;
         }
-        
+
         content.innerHTML = html;
         this.updateNavigation();
 
@@ -147,128 +148,143 @@ class PremortemLite {
             }
         }, 0);
     }
-    
+
+    renderHint(text) {
+        return `<button type="button" class="hint" data-tooltip="${this.esc(text)}" aria-label="${this.esc(text)}">i</button>`;
+    }
+
     renderStep1() {
         const { client, problem, solution, format } = this.project.premortem;
-        
+
         return `
             <div class="space-y-6">
                 <div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">M1-M2: Структура идеи</h3>
-                    <p class="text-gray-600 mb-6">Опишите основные элементы вашей идеи</p>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Шаг 1. Понятное описание идеи</h3>
+                    <p class="text-gray-600 mb-6">Заполните четыре коротких блока — так быстрее увидеть, что именно вы продаёте.</p>
                 </div>
-                
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Клиент</label>
-                        <textarea 
-                            id="client" 
-                            rows="4" 
+                        <label class="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                            Клиент ${this.renderHint('Кому вы помогаете: кто этот человек/компания?')}
+                        </label>
+                        <textarea
+                            id="client"
+                            rows="4"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="Кто ваш клиент? Опишите целевую аудиторию..."
+                            placeholder="Например: владельцы кофеен в центре города"
                         >${client}</textarea>
                     </div>
-                    
+
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Проблема</label>
-                        <textarea 
-                            id="problem" 
-                            rows="4" 
+                        <label class="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                            Проблема ${this.renderHint('Что у клиента болит? Что мешает?')}
+                        </label>
+                        <textarea
+                            id="problem"
+                            rows="4"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="Какую проблему решаете?"
+                            placeholder="Например: нет стабильного потока гостей по будням"
                         >${problem}</textarea>
                     </div>
-                    
+
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Решение</label>
-                        <textarea 
-                            id="solution" 
-                            rows="4" 
+                        <label class="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                            Решение ${this.renderHint('Каким способом вы решаете проблему?')}
+                        </label>
+                        <textarea
+                            id="solution"
+                            rows="4"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="Как решаете проблему?"
+                            placeholder="Например: программа лояльности + локальная реклама"
                         >${solution}</textarea>
                     </div>
-                    
+
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Формат поставки</label>
-                        <textarea 
-                            id="format" 
-                            rows="4" 
+                        <label class="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                            Формат поставки ${this.renderHint('В каком виде клиент получает результат?')}
+                        </label>
+                        <textarea
+                            id="format"
+                            rows="4"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="В каком виде клиент получает решение?"
+                            placeholder="Например: подписка на сервис + настройка под ключ"
                         >${format}</textarea>
                     </div>
+                </div>
+
+                <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                    <h4 class="font-medium text-blue-900 mb-2">Подсказка:</h4>
+                    <p class="text-sm text-blue-800">Пиши как другу: «Мы помогаем [кому] сделать [что] без [боли], за счёт [как]».</p>
                 </div>
             </div>
         `;
     }
-    
+
     renderStep2() {
-        const oneLiners = this.project.premortem.oneLiners;
-        
+        const oneLiners = this.project.premortem.oneLiners || ['', '', ''];
+
         return `
             <div class="space-y-6">
                 <div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">M3: One-liner (3 варианта)</h3>
-                    <p class="text-gray-600 mb-6">Сформулируте краткое описание идеи одной строкой</p>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Шаг 2. Три версии one-liner</h3>
+                    <p class="text-gray-600 mb-6">Сделайте три коротких формулировки. Потом выберете лучшую.</p>
                 </div>
-                
-                <div class="space-y-4">
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Вариант 1</label>
-                        <input 
-                            type="text" 
-                            id="oneLiner1" 
+                        <input
+                            type="text"
+                            id="oneLiner1"
                             value="${oneLiners[0] || ''}"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="Мы помогаем [клиенту] решить [проблему] с помощью [решения]..."
+                            placeholder="Мы помогаем..."
                         />
                     </div>
-                    
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Вариант 2</label>
-                        <input 
-                            type="text" 
-                            id="oneLiner2" 
+                        <input
+                            type="text"
+                            id="oneLiner2"
                             value="${oneLiners[1] || ''}"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="Альтернативная формулировка..."
+                            placeholder="Сервис для..."
                         />
                     </div>
-                    
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Вариант 3</label>
-                        <input 
-                            type="text" 
-                            id="oneLiner3" 
+                        <input
+                            type="text"
+                            id="oneLiner3"
                             value="${oneLiners[2] || ''}"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder="Еще один вариант..."
                         />
                     </div>
                 </div>
-                
+
                 <div class="mt-6 p-4 bg-blue-50 rounded-lg">
                     <h4 class="font-medium text-blue-900 mb-2">Подсказка:</h4>
-                    <p class="text-sm text-blue-800">Хороший one-liner включает: клиента, проблему, решение и результат. Пример: "Мы помогаем малому бизнесу автоматизировать бухучет через Telegram-бота за 5 минут в день."</p>
+                    <p class="text-sm text-blue-800">Хороший one-liner включает клиента, проблему, решение и результат. Пример: "Мы помогаем малому бизнесу автоматизировать бухучет через Telegram-бота за 5 минут в день."</p>
                 </div>
             </div>
         `;
     }
-    
+
     renderStep3() {
         const econ = this.project.premortem.economics;
-        
+
         return `
             <div class="space-y-6">
                 <div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">M4: Экономика диапазонами</h3>
-                    <p class="text-gray-600 mb-6">Оцените минимальные, типичные и максимальные значения</p>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Шаг 3. Экономика диапазонами</h3>
+                    <p class="text-gray-600 mb-6">Оцените минимум/базу/максимум — это честнее, чем одно число.</p>
                 </div>
-                
+
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
-                        <h4 class="font-medium text-gray-900 mb-4">Цена за единицу</h4>
+                        <h4 class="font-medium text-gray-900 mb-4 flex items-center gap-2">Цена за единицу ${this.renderHint('Сколько клиент платит за одну покупку/подписку?')}</h4>
                         <div class="space-y-3">
                             <div>
                                 <label class="block text-xs text-gray-600 mb-1">Минимум</label>
@@ -284,9 +300,9 @@ class PremortemLite {
                             </div>
                         </div>
                     </div>
-                    
+
                     <div>
-                        <h4 class="font-medium text-gray-900 mb-4">Спрос (кол-во)</h4>
+                        <h4 class="font-medium text-gray-900 mb-4 flex items-center gap-2">Спрос (кол-во) ${this.renderHint('Сколько продаж/подписок в месяц?')}</h4>
                         <div class="space-y-3">
                             <div>
                                 <label class="block text-xs text-gray-600 mb-1">Минимум</label>
@@ -302,9 +318,9 @@ class PremortemLite {
                             </div>
                         </div>
                     </div>
-                    
+
                     <div>
-                        <h4 class="font-medium text-gray-900 mb-4">Расходы на единицу</h4>
+                        <h4 class="font-medium text-gray-900 mb-4 flex items-center gap-2">Расходы на единицу ${this.renderHint('Прямые расходы на одну продажу/клиента.')}</h4>
                         <div class="space-y-3">
                             <div>
                                 <label class="block text-xs text-gray-600 mb-1">Минимум</label>
@@ -321,7 +337,7 @@ class PremortemLite {
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="mt-6 p-4 bg-green-50 rounded-lg">
                     <h4 class="font-medium text-green-900 mb-2">Расчет прибыли по сценариям:</h4>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
@@ -342,24 +358,24 @@ class PremortemLite {
             </div>
         `;
     }
-    
+
     renderStep4() {
         const checklist = this.project.premortem.fogi.checklist;
-        
+
         return `
             <div class="space-y-6">
                 <div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">M6: FogI (Index of Ignorance)</h3>
-                    <p class="text-gray-600 mb-6">Отметьте пункты, которые вы уже знаете или понимаете</p>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Шаг 4. FogI (индекс тумана)</h3>
+                    <p class="text-gray-600 mb-6">Отметьте пункты, которые уже понятны. Остальное — зона проверки.</p>
                 </div>
-                
+
                 <div class="space-y-3">
                     ${checklist.map((item, index) => `
                         <div class="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg">
-                            <input 
-                                type="checkbox" 
-                                id="fogi_${index}" 
-                                ${item.checked ? 'checked' : ''} 
+                            <input
+                                type="checkbox"
+                                id="fogi_${index}"
+                                ${item.checked ? 'checked' : ''}
                                 class="mt-1 w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
                             />
                             <label for="fogi_${index}" class="flex-1 text-sm text-gray-700 cursor-pointer">
@@ -368,37 +384,37 @@ class PremortemLite {
                         </div>
                     `).join('')}
                 </div>
-                
+
                 <div class="mt-6 p-4 bg-yellow-50 rounded-lg">
                     <div class="flex items-center justify-between">
                         <span class="font-medium text-yellow-900">Доля "не знаю":</span>
                         <span id="fogiPercentage" class="text-2xl font-bold text-yellow-700">${this.project.premortem.fogi.percentage}%</span>
                     </div>
                     <div class="mt-2 w-full bg-yellow-200 rounded-full h-2">
-                        <div id="fogiProgress" class="bg-yellow-500 h-2 rounded-full transition-all duration-300" style="width: ${this.project.premortem.fogi.percentage}%"></div>
+                        <div id="fogiProgress" class="bg-yellow-500 h-2 rounded-full transition-all duration-300" style="width: ${this.project.premortem.fogi.percentage}%;"></div>
                     </div>
                 </div>
             </div>
         `;
     }
-    
+
     renderStep5() {
         const anomalies = this.project.premortem.illi.anomalies;
-        
+
         return `
             <div class="space-y-6">
                 <div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">M7: IllI (Illusion Index)</h3>
-                    <p class="text-gray-600 mb-6">Отметьте потенциальные аномалии и риски</p>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Шаг 5. IllI (индекс иллюзий)</h3>
+                    <p class="text-gray-600 mb-6">Отметьте риски, которые могут «сломать» красивую картинку.</p>
                 </div>
-                
+
                 <div class="space-y-3">
                     ${anomalies.map((item, index) => `
                         <div class="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg">
-                            <input 
-                                type="checkbox" 
-                                id="illi_${index}" 
-                                ${item.active ? 'checked' : ''} 
+                            <input
+                                type="checkbox"
+                                id="illi_${index}"
+                                ${item.active ? 'checked' : ''}
                                 class="mt-1 w-5 h-5 text-red-600 rounded focus:ring-red-500"
                             />
                             <label for="illi_${index}" class="flex-1 text-sm text-gray-700 cursor-pointer">
@@ -407,7 +423,7 @@ class PremortemLite {
                         </div>
                     `).join('')}
                 </div>
-                
+
                 <div class="mt-6 p-4 bg-red-50 rounded-lg">
                     <div class="flex items-center justify-between">
                         <span class="font-medium text-red-900">Активных аномалий:</span>
@@ -418,28 +434,28 @@ class PremortemLite {
             </div>
         `;
     }
-    
+
     renderStep6() {
         const verdict = this.project.premortem.verdict;
         const profitScenarios = Calculators.calculateProfitScenarios(this.project.premortem.economics);
         const fogi = Calculators.calculateFogI(this.project.premortem.fogi.checklist);
         const illi = this.project.premortem.illi.anomalies.filter(a => a.active).length;
         const calculatedVerdict = Calculators.calculateVerdict(profitScenarios, fogi, illi);
-        
+
         return `
             <div class="space-y-6">
                 <div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">M13: Вердикт</h3>
-                    <p class="text-gray-600 mb-6">Автоматический расчет на основе введенных данных</p>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Шаг 6. Вердикт</h3>
+                    <p class="text-gray-600 mb-6">Система предлагает решение, но финальный выбор — ваш.</p>
                 </div>
-                
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="p-4 bg-gray-50 rounded-lg">
                         <h4 class="font-medium text-gray-900 mb-3">Метрики</h4>
                         <div class="space-y-2 text-sm">
                             <div class="flex justify-between">
                                 <span>Средняя прибыль:</span>
-                                <span class="font-medium">${Math.round((profitScenarios.pessimistic + profitScenarios.typical + profitScenarios.optimistic) / 3).toLocaleString()}</span>
+                                <span class="font-medium">${NumberUtils.formatNumber(Math.round((profitScenarios.pessimistic + profitScenarios.typical + profitScenarios.optimistic) / 3))}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span>FogI (не знаю):</span>
@@ -451,14 +467,14 @@ class PremortemLite {
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="p-4 rounded-lg ${this.getVerdictClass(calculatedVerdict.status)}">
                         <h4 class="font-medium mb-3">Рекомендуемый вердикт</h4>
                         <div class="text-2xl font-bold mb-2">${this.getVerdictText(calculatedVerdict.status)}</div>
                         <p class="text-sm">${calculatedVerdict.reason}</p>
                     </div>
                 </div>
-                
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Итоговое решение</label>
                     <select id="finalVerdict" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -468,12 +484,12 @@ class PremortemLite {
                         <option value="kill" ${verdict.status === 'kill' ? 'selected' : ''}>Закрыть</option>
                     </select>
                 </div>
-                
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Обоснование решения</label>
-                    <textarea 
-                        id="verdictReason" 
-                        rows="3" 
+                    <textarea
+                        id="verdictReason"
+                        rows="3"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="Почему принято именно это решение?"
                     >${verdict.reason}</textarea>
@@ -481,22 +497,22 @@ class PremortemLite {
             </div>
         `;
     }
-    
+
     renderStep7() {
         const plan = this.project.premortem.plan;
-        
+
         return `
             <div class="space-y-6">
                 <div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">M14: План действий (5-7 шагов)</h3>
-                    <p class="text-gray-600 mb-6">Определите ключевые этапы реализации проекта</p>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Шаг 7. План действий (5-7 шагов)</h3>
+                    <p class="text-gray-600 mb-6">Определите ближайшие 1–2 недели. План снижает туман.</p>
                 </div>
-                
+
                 <div id="planSteps" class="space-y-4">
                     ${plan.length === 0 ? this.renderEmptyPlan() : plan.map((step, index) => this.renderPlanStep(step, index)).join('')}
                 </div>
-                
-                <div class="flex space-x-3">
+
+                <div class="flex flex-wrap gap-3">
                     <button id="addStep" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                         <i class="fas fa-plus mr-2"></i>Добавить шаг
                     </button>
@@ -506,17 +522,17 @@ class PremortemLite {
                         </button>
                     ` : ''}
                 </div>
-                
+
                 <div class="mt-6 p-4 bg-green-50 rounded-lg">
                     <div class="flex items-center justify-between">
                         <span class="font-medium text-green-900">Общая продолжительность:</span>
-                        <span id="totalDuration" class="text-lg font-bold text-green-700">${plan.reduce((sum, step) => sum + (step.duration || 0), 0)} дней</span>
+                        <span id="totalDuration" class="text-lg font-bold text-green-700">${plan.reduce((sum, step) => sum + NumberUtils.safeNumber(step.duration, 0), 0)} дней</span>
                     </div>
                 </div>
             </div>
         `;
     }
-    
+
     renderEmptyPlan() {
         return `
             <div class="text-center py-8 text-gray-500">
@@ -525,7 +541,7 @@ class PremortemLite {
             </div>
         `;
     }
-    
+
     renderPlanStep(step, index) {
         return `
             <div class="border border-gray-200 rounded-lg p-4">
@@ -534,16 +550,16 @@ class PremortemLite {
                         ${index + 1}
                     </div>
                     <div class="flex-1 space-y-3">
-                        <input 
-                            type="text" 
+                        <input
+                            type="text"
                             class="step-description w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder="Описание шага"
                             value="${step.step || ''}"
                         />
                         <div class="flex items-center space-x-3">
                             <label class="text-sm text-gray-600">Продолжительность:</label>
-                            <input 
-                                type="number" 
+                            <input
+                                type="number"
                                 class="step-duration w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 value="${step.duration || 7}"
                                 min="1"
@@ -555,7 +571,7 @@ class PremortemLite {
             </div>
         `;
     }
-    
+
     getVerdictClass(status) {
         const classes = {
             proceed: 'bg-green-50 text-green-900',
@@ -565,7 +581,7 @@ class PremortemLite {
         };
         return classes[status] || 'bg-gray-50 text-gray-900';
     }
-    
+
     getVerdictText(status) {
         const texts = {
             proceed: 'Запускать',
@@ -575,14 +591,14 @@ class PremortemLite {
         };
         return texts[status] || 'Не определено';
     }
-    
+
     saveCurrentStep() {
         const stepData = this.collectStepData();
         if (stepData) {
             this.project.premortem = { ...this.project.premortem, ...stepData };
         }
     }
-    
+
     collectStepData() {
         switch (this.currentStep) {
             case 1:
@@ -604,23 +620,23 @@ class PremortemLite {
                 return {
                     economics: {
                         price: {
-                            min: parseFloat(document.getElementById('priceMin')?.value) || 0,
-                            typ: parseFloat(document.getElementById('priceTyp')?.value) || 0,
-                            max: parseFloat(document.getElementById('priceMax')?.value) || 0
+                            min: NumberUtils.safeNumber(document.getElementById('priceMin')?.value, 0),
+                            typ: NumberUtils.safeNumber(document.getElementById('priceTyp')?.value, 0),
+                            max: NumberUtils.safeNumber(document.getElementById('priceMax')?.value, 0)
                         },
                         demand: {
-                            min: parseFloat(document.getElementById('demandMin')?.value) || 0,
-                            typ: parseFloat(document.getElementById('demandTyp')?.value) || 0,
-                            max: parseFloat(document.getElementById('demandMax')?.value) || 0
+                            min: NumberUtils.safeNumber(document.getElementById('demandMin')?.value, 0),
+                            typ: NumberUtils.safeNumber(document.getElementById('demandTyp')?.value, 0),
+                            max: NumberUtils.safeNumber(document.getElementById('demandMax')?.value, 0)
                         },
                         expenses: {
-                            min: parseFloat(document.getElementById('expensesMin')?.value) || 0,
-                            typ: parseFloat(document.getElementById('expensesTyp')?.value) || 0,
-                            max: parseFloat(document.getElementById('expensesMax')?.value) || 0
+                            min: NumberUtils.safeNumber(document.getElementById('expensesMin')?.value, 0),
+                            typ: NumberUtils.safeNumber(document.getElementById('expensesTyp')?.value, 0),
+                            max: NumberUtils.safeNumber(document.getElementById('expensesMax')?.value, 0)
                         }
                     }
                 };
-            case 4:
+            case 4: {
                 const checklist = this.project.premortem.fogi.checklist;
                 checklist.forEach((item, index) => {
                     const checkbox = document.getElementById(`fogi_${index}`);
@@ -633,7 +649,8 @@ class PremortemLite {
                         percentage: Calculators.calculateFogI(checklist)
                     }
                 };
-            case 5:
+            }
+            case 5: {
                 const anomalies = this.project.premortem.illi.anomalies;
                 anomalies.forEach((item, index) => {
                     const checkbox = document.getElementById(`illi_${index}`);
@@ -645,6 +662,7 @@ class PremortemLite {
                         anomalies
                     }
                 };
+            }
             case 6:
                 return {
                     verdict: {
@@ -652,7 +670,7 @@ class PremortemLite {
                         reason: document.getElementById('verdictReason')?.value || ''
                     }
                 };
-            case 7:
+            case 7: {
                 const steps = [];
                 document.querySelectorAll('.step-description').forEach((desc, index) => {
                     const duration = document.querySelectorAll('.step-duration')[index];
@@ -660,21 +678,22 @@ class PremortemLite {
                         steps.push({
                             id: index + 1,
                             step: desc.value.trim(),
-                            duration: parseInt(duration.value) || 7
+                            duration: NumberUtils.clamp(duration?.value, 1, 365, 7)
                         });
                     }
                 });
                 return { plan: steps };
+            }
             default:
                 return null;
         }
     }
-    
+
     save() {
         this.saveCurrentStep();
         return this.project;
     }
-    
+
     refresh() {
         // Recalculate dynamic values
         if (this.currentStep === 3) {
@@ -685,44 +704,44 @@ class PremortemLite {
             this.bindPlanEvents();
         }
     }
-    
+
     updateProfitScenarios() {
         const economics = {
             price: {
-                min: parseFloat(document.getElementById('priceMin')?.value) || 0,
-                typ: parseFloat(document.getElementById('priceTyp')?.value) || 0,
-                max: parseFloat(document.getElementById('priceMax')?.value) || 0
+                min: NumberUtils.safeNumber(document.getElementById('priceMin')?.value, 0),
+                typ: NumberUtils.safeNumber(document.getElementById('priceTyp')?.value, 0),
+                max: NumberUtils.safeNumber(document.getElementById('priceMax')?.value, 0)
             },
             demand: {
-                min: parseFloat(document.getElementById('demandMin')?.value) || 0,
-                typ: parseFloat(document.getElementById('demandTyp')?.value) || 0,
-                max: parseFloat(document.getElementById('demandMax')?.value) || 0
+                min: NumberUtils.safeNumber(document.getElementById('demandMin')?.value, 0),
+                typ: NumberUtils.safeNumber(document.getElementById('demandTyp')?.value, 0),
+                max: NumberUtils.safeNumber(document.getElementById('demandMax')?.value, 0)
             },
             expenses: {
-                min: parseFloat(document.getElementById('expensesMin')?.value) || 0,
-                typ: parseFloat(document.getElementById('expensesTyp')?.value) || 0,
-                max: parseFloat(document.getElementById('expensesMax')?.value) || 0
+                min: NumberUtils.safeNumber(document.getElementById('expensesMin')?.value, 0),
+                typ: NumberUtils.safeNumber(document.getElementById('expensesTyp')?.value, 0),
+                max: NumberUtils.safeNumber(document.getElementById('expensesMax')?.value, 0)
             }
         };
-        
+
         const scenarios = Calculators.calculateProfitScenarios(economics);
-        
+
         const pessimisticEl = document.getElementById('profitPessimistic');
         const typicalEl = document.getElementById('profitTypical');
         const optimisticEl = document.getElementById('profitOptimistic');
-        
-        if (pessimisticEl) pessimisticEl.textContent = scenarios.pessimistic.toLocaleString();
-        if (typicalEl) typicalEl.textContent = scenarios.typical.toLocaleString();
-        if (optimisticEl) optimisticEl.textContent = scenarios.optimistic.toLocaleString();
+
+        if (pessimisticEl) pessimisticEl.textContent = NumberUtils.formatNumber(scenarios.pessimistic);
+        if (typicalEl) typicalEl.textContent = NumberUtils.formatNumber(scenarios.typical);
+        if (optimisticEl) optimisticEl.textContent = NumberUtils.formatNumber(scenarios.optimistic);
     }
-    
+
     updateFogI() {
         const checklist = this.project.premortem.fogi.checklist;
         const percentage = Calculators.calculateFogI(checklist);
-        
+
         const percentageEl = document.getElementById('fogiPercentage');
         const progressEl = document.getElementById('fogiProgress');
-        
+
         if (percentageEl) percentageEl.textContent = percentage + '%';
         if (progressEl) progressEl.style.width = percentage + '%';
     }
@@ -736,11 +755,10 @@ class PremortemLite {
         if (countEl) countEl.textContent = activeCount;
     }
 
-    
     bindPlanEvents() {
         const addBtn = document.getElementById('addStep');
         const removeBtn = document.getElementById('removeStep');
-        
+
         if (addBtn) {
             addBtn.onclick = () => this.addPlanStep();
         }
@@ -748,7 +766,7 @@ class PremortemLite {
             removeBtn.onclick = () => this.removePlanStep();
         }
     }
-    
+
     addPlanStep() {
         const planSteps = document.getElementById('planSteps');
         const newStep = {
@@ -756,29 +774,41 @@ class PremortemLite {
             step: '',
             duration: 7
         };
-        
+
         const stepHtml = this.renderPlanStep(newStep, this.project.premortem.plan.length);
-        
+
         if (this.project.premortem.plan.length === 0) {
             planSteps.innerHTML = stepHtml;
         } else {
             planSteps.insertAdjacentHTML('beforeend', stepHtml);
         }
-        
+
         this.project.premortem.plan.push(newStep);
         this.updateTotalDuration();
+        if (window.app) window.app.persistProject(true);
     }
-    
+
     removePlanStep() {
         if (this.project.premortem.plan.length > 0) {
             this.project.premortem.plan.pop();
             this.loadStep(7);
+            if (window.app) window.app.persistProject(true);
         }
     }
-    
+
     updateTotalDuration() {
-        const total = this.project.premortem.plan.reduce((sum, step) => sum + (step.duration || 0), 0);
+        const total = this.project.premortem.plan.reduce((sum, step) => sum + NumberUtils.safeNumber(step.duration, 0), 0);
         const totalEl = document.getElementById('totalDuration');
         if (totalEl) totalEl.textContent = total + ' дней';
+    }
+
+    esc(str) {
+        return String(str ?? '').replace(/[&<>"']/g, (c) => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        }[c]));
     }
 }
