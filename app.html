@@ -9,7 +9,61 @@
 
     <style>
         :root {
+            color-scheme: light dark;
+        }
+        html[data-theme="light"] {
             color-scheme: light;
+        }
+        html[data-theme="dark"] {
+            color-scheme: dark;
+        }
+        html[data-theme="dark"] body {
+            background: #0f172a;
+            color: #e5e7eb;
+        }
+        html[data-theme="dark"] .bg-white {
+            background-color: #1f2937 !important;
+        }
+        html[data-theme="dark"] .bg-gray-50 {
+            background-color: #111827 !important;
+        }
+        html[data-theme="dark"] .bg-gray-100 {
+            background-color: #1f2937 !important;
+        }
+        html[data-theme="dark"] .bg-gray-200 {
+            background-color: #374151 !important;
+        }
+        html[data-theme="dark"] .text-gray-900 {
+            color: #f9fafb !important;
+        }
+        html[data-theme="dark"] .text-gray-700 {
+            color: #e2e8f0 !important;
+        }
+        html[data-theme="dark"] .text-gray-600 {
+            color: #cbd5e1 !important;
+        }
+        html[data-theme="dark"] .text-gray-500 {
+            color: #94a3b8 !important;
+        }
+        html[data-theme="dark"] .border,
+        html[data-theme="dark"] .border-b,
+        html[data-theme="dark"] .border-t {
+            border-color: #334155 !important;
+        }
+        html[data-theme="dark"] .shadow-sm {
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.45);
+        }
+        html[data-theme="dark"] input,
+        html[data-theme="dark"] textarea,
+        html[data-theme="dark"] select {
+            background: #0f172a;
+            border-color: #334155;
+            color: #e5e7eb;
+        }
+        html[data-theme="dark"] .hint {
+            background: #334155;
+            color: #e2e8f0;
+            border-color: #475569;
         }
         .safe-area {
             padding-left: env(safe-area-inset-left);
@@ -21,9 +75,11 @@
             overflow-x: auto;
             scrollbar-width: thin;
             -webkit-overflow-scrolling: touch;
+            scroll-snap-type: x proximity;
         }
         .module-tab {
             white-space: nowrap;
+            scroll-snap-align: center;
         }
         .hint {
             position: relative;
@@ -72,6 +128,107 @@
         .mobile-scroll-hint {
             display: none;
         }
+        .tab-label-short {
+            display: none;
+        }
+        .premortem-stepper {
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+        .premortem-stepper::-webkit-scrollbar {
+            display: none;
+        }
+        .step-btn {
+            scroll-snap-align: center;
+        }
+        .step-btn.step-active {
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+        }
+        .metric-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.35rem 0.6rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: #eff6ff;
+            color: #1d4ed8;
+        }
+        .metric-badge--success {
+            background: #dcfce7;
+            color: #166534;
+        }
+        .metric-badge--warning {
+            background: #fef9c3;
+            color: #854d0e;
+        }
+        .metric-badge--danger {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+        html[data-theme="dark"] .metric-badge {
+            background: rgba(59, 130, 246, 0.2);
+            color: #93c5fd;
+        }
+        html[data-theme="dark"] .metric-badge--success {
+            background: rgba(34, 197, 94, 0.2);
+            color: #86efac;
+        }
+        html[data-theme="dark"] .metric-badge--warning {
+            background: rgba(234, 179, 8, 0.2);
+            color: #fde047;
+        }
+        html[data-theme="dark"] .metric-badge--danger {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+        }
+        .segments-cards {
+            display: none;
+        }
+        .bottom-nav {
+            display: none;
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 50;
+            padding: 0.5rem 1rem calc(0.75rem + env(safe-area-inset-bottom));
+            border-top: 1px solid #e5e7eb;
+            background: #fff;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .bottom-nav__item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.2rem;
+            font-size: 0.7rem;
+            color: #6b7280;
+            padding: 0.35rem 0.25rem;
+            border-radius: 0.75rem;
+        }
+        .bottom-nav__item.active {
+            color: #2563eb;
+            background: rgba(59, 130, 246, 0.12);
+        }
+        html[data-theme="dark"] .bottom-nav {
+            background: #1f2937;
+            border-color: #334155;
+        }
+        html[data-theme="dark"] .bottom-nav__item {
+            color: #94a3b8;
+        }
+        html[data-theme="dark"] .bottom-nav__item.active {
+            color: #93c5fd;
+            background: rgba(59, 130, 246, 0.2);
+        }
+        .theme-toggle i {
+            width: 1.1rem;
+        }
         :focus-visible {
             outline: 3px solid rgba(59, 130, 246, 0.4);
             outline-offset: 2px;
@@ -80,9 +237,39 @@
             .module-tabs {
                 gap: 0.5rem;
             }
+            .module-tab {
+                padding: 0.75rem 0.75rem;
+            }
             .header-actions {
                 flex-wrap: wrap;
                 justify-content: flex-start;
+            }
+            .tab-label-full {
+                display: none;
+            }
+            .tab-label-short {
+                display: inline;
+            }
+            .premortem-stepper {
+                padding-bottom: 0.25rem;
+                gap: 0.5rem;
+            }
+            .step-btn {
+                width: 3rem;
+                height: 3rem;
+                font-size: 1rem;
+            }
+            .segments-table {
+                display: none;
+            }
+            .segments-cards {
+                display: block;
+            }
+            .bottom-nav {
+                display: flex;
+            }
+            body.has-bottom-nav main {
+                padding-bottom: 6.5rem;
             }
         }
         @media (max-width: 640px) {
@@ -107,7 +294,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen safe-area">
+<body class="bg-gray-50 min-h-screen safe-area has-bottom-nav">
     <!-- Шапка с навигацией -->
     <header class="bg-white shadow-sm border-b">
         <div class="max-w-7xl mx-auto px-4 py-3">
@@ -124,6 +311,9 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-3 header-actions">
+                    <button id="themeToggle" class="theme-toggle px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm" type="button">
+                        <i class="fas fa-moon mr-1"></i><span class="theme-toggle-label">Тема</span>
+                    </button>
                     <button id="helpBtn" class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm" title="Инструкция">
                         <i class="fas fa-circle-question mr-1"></i>Инструкция
                     </button>
@@ -143,19 +333,19 @@
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex space-x-4 module-tabs">
                 <button data-module="premortem" class="module-tab py-4 px-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors">
-                    <i class="fas fa-brain mr-2"></i>Premortem Lite
+                    <i class="fas fa-brain mr-2"></i><span class="tab-label-full">Premortem Lite</span><span class="tab-label-short">Premortem</span>
                 </button>
                 <button data-module="report" class="module-tab py-4 px-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors">
-                    <i class="fas fa-file-lines mr-2"></i>Отчёт
+                    <i class="fas fa-file-lines mr-2"></i><span class="tab-label-full">Отчёт</span><span class="tab-label-short">Отчёт</span>
                 </button>
                 <button data-module="segments" class="module-tab py-4 px-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors">
-                    <i class="fas fa-chart-pie mr-2"></i>Сегменты
+                    <i class="fas fa-chart-pie mr-2"></i><span class="tab-label-full">Сегменты</span><span class="tab-label-short">Сегм.</span>
                 </button>
                 <button data-module="operations" class="module-tab py-4 px-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors">
-                    <i class="fas fa-cogs mr-2"></i>Операционная устойчивость
+                    <i class="fas fa-cogs mr-2"></i><span class="tab-label-full">Операционная устойчивость</span><span class="tab-label-short">Опер.</span>
                 </button>
                 <button data-module="portfolio" class="module-tab py-4 px-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors">
-                    <i class="fas fa-briefcase mr-2"></i>Портфель идей
+                    <i class="fas fa-briefcase mr-2"></i><span class="tab-label-full">Портфель идей</span><span class="tab-label-short">Портфель</span>
                 </button>
             </div>
         </div>
@@ -188,8 +378,8 @@
             <!-- Шаги Premortem -->
             <div class="bg-white rounded-lg shadow-sm border p-6">
                 <!-- Навигация по шагам -->
-                <div class="flex items-center justify-between mb-8">
-                    <div class="flex space-x-2">
+                <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-8">
+                    <div class="premortem-stepper flex space-x-2">
                         <button data-step="1" class="step-btn w-10 h-10 rounded-full bg-blue-600 text-white font-medium">1</button>
                         <button data-step="2" class="step-btn w-10 h-10 rounded-full bg-gray-200 text-gray-600 font-medium">2</button>
                         <button data-step="3" class="step-btn w-10 h-10 rounded-full bg-gray-200 text-gray-600 font-medium">3</button>
@@ -290,8 +480,10 @@
                     </div>
                 </div>
 
+                <div id="segmentsCards" class="segments-cards space-y-4"></div>
+
                 <div class="mobile-scroll-hint text-xs text-gray-500 mb-2">На телефоне таблица прокручивается по горизонтали →</div>
-                <div class="overflow-x-auto">
+                <div class="segments-table overflow-x-auto">
                     <table class="w-full">
                         <thead>
                             <tr class="border-b text-left">
@@ -454,6 +646,26 @@
         </div>
 
     </main>
+
+    <!-- Нижняя навигация (mobile) -->
+    <nav class="bottom-nav md:hidden" aria-label="Нижняя навигация">
+        <button class="bottom-nav__item" data-module="premortem" type="button">
+            <i class="fas fa-brain text-base"></i>
+            <span>Premortem</span>
+        </button>
+        <button class="bottom-nav__item" data-module="report" type="button">
+            <i class="fas fa-file-lines text-base"></i>
+            <span>Report</span>
+        </button>
+        <button class="bottom-nav__item" data-module="analysis" type="button">
+            <i class="fas fa-chart-line text-base"></i>
+            <span>Analysis</span>
+        </button>
+        <button class="bottom-nav__item" data-module="portfolio" type="button">
+            <i class="fas fa-sliders text-base"></i>
+            <span>Project</span>
+        </button>
+    </nav>
 
     <!-- Модальное окно инструкции -->
     <div id="helpModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
